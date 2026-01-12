@@ -183,16 +183,14 @@
   }
 
   onMount(async () => {
-    // Set Cesium Ion token (use default or get your own at cesium.com)
-    Ion.defaultAccessToken =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NDE2NH0.XcKpgANiY19MC4bdFUXMVEBToBmqS8kuYpUlxJHYZxk";
+    // Note: For Cesium Ion assets (terrain, imagery), get a free token at https://cesium.com/ion/
+    // Without a token, basic OpenStreetMap imagery will be used
 
     viewer = new Viewer(cesiumContainer, {
-      terrain: undefined,
       animation: false,
       timeline: false,
       baseLayerPicker: true,
-      geocoder: true,
+      geocoder: false,  // Geocoder requires Ion token
       homeButton: true,
       sceneModePicker: true,
       navigationHelpButton: false,
