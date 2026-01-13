@@ -7,6 +7,7 @@ make it easy to input/output GeoPose and interoperate across systems and platfor
 - `packages/geopose-lib`: TypeScript/JavaScript transforms library intended for npm publishing.
 - `gepose-transforms/`: Language-specific implementations (C, C#, Java, Kotlin, Python, Swift).
 - `wrappers/`: Higher-level wrappers and adapters around GeoPose transforms.
+- `integrations/cesium/cesium-geopose`: Cesium integration package (adapter + controller).
 - `sandbox/cesium-transforms-test`: Cesium-based visual verification demo.
 - `devlog/`: Proposals, plans, and development logs.
 
