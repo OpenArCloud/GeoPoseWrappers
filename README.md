@@ -1,10 +1,23 @@
 # GeoPoseWrappers
-Libraries or other code projects that help developers and implementers of systems/applications/solutions that handles what equates to geospatial postition and orientation in one way or the other to make it easy to input or output GeoPose to be interoperable with other systems.
+Monorepo for GeoPose-related libraries, wrappers, demos, and plans. The goal is to
+make it easy to input/output GeoPose and interoperate across systems and platforms.
+
+## Repo layout
+
+- `packages/geopose-lib`: TypeScript/JavaScript transforms library intended for npm publishing.
+- `gepose-transforms/`: Language-specific implementations (C, C#, Java, Kotlin, Python, Swift).
+- `wrappers/`: Higher-level wrappers and adapters around GeoPose transforms.
+- `sandbox/cesium-transforms-test`: Cesium-based visual verification demo.
+- `geopose-transforms-proposal.md`: API proposal and rationale.
+- `transform-lib-improvements.md`: Planned improvements and extensions.
+- `wrapper-plan.md`: Wrapper roadmap notes.
+- `logfile_*.md`: Development logs and decisions.
 
 ## Status
 
 Alpha. This repo and its packages are highly likely to be subject to breaking changes.
 The `geopose-lib` package is published by the Open AR Cloud Association.
+The alpha release is available on npm: https://www.npmjs.com/package/geopose-lib
 
 ## License
 

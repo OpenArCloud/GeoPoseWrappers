@@ -1,25 +1,27 @@
 import { GeoPose, GeoPoseBYPR, ECEF, Quaternion, WGS84 } from '../types.js';
 
+/** Degrees-to-radians conversion factor. */
 const DEG_TO_RAD = Math.PI / 180;
+/** Radians-to-degrees conversion factor. */
 const RAD_TO_DEG = 180 / Math.PI;
 
 /**
- * Converts Degrees to Radians
+ * Convert degrees to radians.
  */
 function degToRad(deg: number): number {
     return deg * DEG_TO_RAD;
 }
 
 /**
- * Converts Radians to Degrees
+ * Convert radians to degrees.
  */
 function radToDeg(rad: number): number {
     return rad * RAD_TO_DEG;
 }
 
 /**
- * Convert Basic-Quaternion to Basic-YPR representation.
- * Convention: Z-Y-X intrinsic rotations (Yaw -> Pitch -> Roll)
+ * Convert Basic Quaternion to Basic YPR.
+ * Uses intrinsic Z-Y-X rotations (Yaw -> Pitch -> Roll).
  */
 export function quaternionToYPR(geoPose: GeoPose): GeoPoseBYPR {
     const q = geoPose.quaternion;
@@ -53,8 +55,8 @@ export function quaternionToYPR(geoPose: GeoPose): GeoPoseBYPR {
 }
 
 /**
- * Convert Basic-YPR to Basic-Quaternion representation.
- * Convention: Z-Y-X intrinsic rotations (Yaw -> Pitch -> Roll)
+ * Convert Basic YPR to Basic Quaternion.
+ * Uses intrinsic Z-Y-X rotations (Yaw -> Pitch -> Roll).
  */
 export function yprToQuaternion(geoPose: GeoPoseBYPR): GeoPose {
     const yaw = degToRad(geoPose.angles.yaw);
@@ -80,7 +82,8 @@ export function yprToQuaternion(geoPose: GeoPoseBYPR): GeoPose {
 }
 
 /**
- * Convert Geodetic (Lat/Lon/H) to ECEF XYZ using WGS84 parameters.
+ * Convert geodetic WGS84 (lat/lon/height) to ECEF (meters).
+ * Orientation is rotated from local ENU into the ECEF frame.
  */
 export function geoPoseToECEF(geoPose: GeoPose): { position: ECEF; orientation: Quaternion } {
     const lat = degToRad(geoPose.position.lat);
@@ -125,8 +128,9 @@ export function geoPoseToECEF(geoPose: GeoPose): { position: ECEF; orientation: 
 }
 
 /**
- * Convert ECEF XYZ to Geodetic (Lat/Lon/H) using WGS84.
- * Uses iterative method for high precision.
+ * Convert ECEF (meters) to geodetic WGS84 (lat/lon/height).
+ * Uses an iterative solver for improved accuracy and rotates orientation back
+ * into the local ENU frame.
  */
 export function ecefToGeoPose(ecef: ECEF, orientation: Quaternion): GeoPose {
     const x = ecef.x;
@@ -165,7 +169,7 @@ export function ecefToGeoPose(ecef: ECEF, orientation: Quaternion): GeoPose {
 // --- Helpers ---
 
 /**
- * Returns quaternion representing rotation from ENU frame to ECEF frame at given lat/lon (radians).
+ * Return the rotation from ENU to ECEF at a given lat/lon (radians).
  */
 function getEnuToEcefRotation(lat: number, lon: number): Quaternion {
     // ENU to ECEF rotation matrix columns:
@@ -186,6 +190,9 @@ function getEnuToEcefRotation(lat: number, lon: number): Quaternion {
     return matrixToQuaternion(m00, m01, m02, m10, m11, m12, m20, m21, m22);
 }
 
+/**
+ * Return the rotation from ECEF to ENU at a given lat/lon (radians).
+ */
 function getEcefToEnuRotation(lat: number, lon: number): Quaternion {
     // Inverse of EnuToEcef (transpose)
     const cl = Math.cos(lat);
@@ -201,6 +208,9 @@ function getEcefToEnuRotation(lat: number, lon: number): Quaternion {
     return matrixToQuaternion(m00, m01, m02, m10, m11, m12, m20, m21, m22);
 }
 
+/**
+ * Convert a 3x3 rotation matrix to a quaternion.
+ */
 function matrixToQuaternion(
     m00: number, m01: number, m02: number,
     m10: number, m11: number, m12: number,
@@ -240,6 +250,9 @@ function matrixToQuaternion(
     return { x, y, z, w };
 }
 
+/**
+ * Multiply two quaternions (a * b).
+ */
 function multiplyQuaternions(a: Quaternion, b: Quaternion): Quaternion {
     return {
         x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,

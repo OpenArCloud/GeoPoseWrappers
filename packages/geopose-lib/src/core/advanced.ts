@@ -2,17 +2,17 @@ import { GeoPose, ENU, Quaternion } from '../types.js';
 import { geoPoseToLocalENU, localENUToGeoPose } from './local.js';
 
 /**
- * Calculate the relative pose between two GeoPoses (from -> to).
- * Returns the translation and rotation required to get from 'from' to 'to'
- * in the local frame of 'from'.
+ * Compute the relative pose between two GeoPoses (from -> to).
+ * Returns the translation and rotation in the local frame of `from`.
  */
 export function getRelativePose(from: GeoPose, to: GeoPose): { translation: ENU; rotation: Quaternion } {
     // This is effectively describing 'to' in the local frame of 'from'.
-    return geoPoseToLocalENU(to, from.position);
+    const local = geoPoseToLocalENU(to, from.position);
+    return { translation: local.position, rotation: local.orientation };
 }
 
 /**
- * Apply a relative transformation to a base GeoPose.
+ * Apply a relative transformation (translation + rotation) to a base GeoPose.
  */
 export function applyRelativePose(base: GeoPose, relative: { translation: ENU; rotation: Quaternion }): GeoPose {
     // This is effectively converting a local coordinate back to global.
@@ -21,7 +21,7 @@ export function applyRelativePose(base: GeoPose, relative: { translation: ENU; r
 
 /**
  * Spherical linear interpolation between two poses.
- * t: 0.0 to 1.0
+ * @param t Interpolation factor in [0, 1].
  */
 export function interpolatePose(from: GeoPose, to: GeoPose, t: number): GeoPose {
     // 1. Interpolate Position
@@ -52,14 +52,20 @@ export function interpolatePose(from: GeoPose, to: GeoPose, t: number): GeoPose 
     return import_conversions.ecefToGeoPose({ x, y, z }, q);
 }
 
-// Workaround for import to avoid circular dependency issues at runtime if any?
-// ES modules handle cyclic deps well usually, but let's be explicit.
+// Workaround for import to avoid circular dependency issues at runtime if any.
+// ES modules handle cyclic deps, but this keeps intent clear.
 import * as import_conversions from './conversions.js';
 
+/**
+ * Linear interpolation helper.
+ */
 function lerp(a: number, b: number, t: number): number {
     return a + (b - a) * t;
 }
 
+/**
+ * Spherical linear interpolation (SLERP) between two unit quaternions.
+ */
 function slerp(qa: Quaternion, qb: Quaternion, t: number): Quaternion {
     // standard slerp
     let x = qa.x, y = qa.y, z = qa.z, w = qa.w;

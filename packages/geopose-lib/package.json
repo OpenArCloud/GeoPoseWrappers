@@ -34,6 +34,15 @@
   ],
   "author": "Open AR Cloud Association",
   "license": "MIT",
+  "homepage": "https://github.com/OpenArCloud/GeoPoseWrappers/tree/main/packages/geopose-lib",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenArCloud/GeoPoseWrappers.git",
+    "directory": "packages/geopose-lib"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenArCloud/GeoPoseWrappers/issues"
+  },
   "publishConfig": {
     "access": "public"
   },

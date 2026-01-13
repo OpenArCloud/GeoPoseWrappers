@@ -23,16 +23,23 @@ import {
     interpolatePose
 } from './core/advanced.js';
 
+/**
+ * Relative pose expressed as ENU translation and quaternion rotation.
+ */
 export type RelativePose = { translation: ENU; rotation: Quaternion };
 
 /**
  * Convenience wrapper around GeoPose (Basic Quaternion).
- * Internal state is stored as position + quaternion.
+ * Internal state is stored as position + quaternion and exposed through
+ * helpers for YPR, ENU, ECEF, and JSON workflows.
  */
 export class GeoPoseBasic {
     private _position: LLH;
     private _quaternion: Quaternion;
 
+    /**
+     * Create a GeoPoseBasic from a Basic Quaternion GeoPose.
+     */
     constructor(pose: GeoPose) {
         this._position = { ...pose.position };
         this._quaternion = { ...pose.quaternion };
@@ -42,10 +49,17 @@ export class GeoPoseBasic {
     // Static constructors
     // ---------------------------------------------------------------------
 
+    /**
+     * Create a GeoPoseBasic from a Basic Quaternion GeoPose.
+     */
     static fromGeoPose(pose: GeoPose): GeoPoseBasic {
         return new GeoPoseBasic(pose);
     }
 
+    /**
+     * Create from a position and optional quaternion.
+     * If no quaternion is provided, identity orientation is used.
+     */
     static fromPosition(position: LLH, quaternion?: Quaternion): GeoPoseBasic {
         return new GeoPoseBasic({
             position: { ...position },
@@ -53,6 +67,9 @@ export class GeoPoseBasic {
         });
     }
 
+    /**
+     * Create from latitude/longitude/height and optional quaternion.
+     */
     static fromLatLonHeight(
         lat: number,
         lon: number,
@@ -62,6 +79,9 @@ export class GeoPoseBasic {
         return GeoPoseBasic.fromPosition({ lat, lon, h }, quaternion);
     }
 
+    /**
+     * Create from a position and YPR angles in degrees.
+     */
     static fromYPR(position: LLH, yaw: number, pitch: number, roll: number): GeoPoseBasic {
         return new GeoPoseBasic(
             yprToQuaternion({
@@ -71,6 +91,9 @@ export class GeoPoseBasic {
         );
     }
 
+    /**
+     * Create from latitude/longitude/height and YPR angles in degrees.
+     */
     static fromLatLonHeightYPR(
         lat: number,
         lon: number,
@@ -82,31 +105,52 @@ export class GeoPoseBasic {
         return GeoPoseBasic.fromYPR({ lat, lon, h }, yaw, pitch, roll);
     }
 
+    /**
+     * Create from ECEF coordinates and orientation.
+     */
     static fromECEF(position: ECEF, orientation: Quaternion): GeoPoseBasic {
         return new GeoPoseBasic(ecefToGeoPose(position, orientation));
     }
 
+    /**
+     * Create from local ENU coordinates and orientation at a given origin.
+     */
     static fromLocalENU(enu: ENU, orientation: Quaternion, origin: LLH): GeoPoseBasic {
         return new GeoPoseBasic(localENUToGeoPose(enu, orientation, origin));
     }
 
+    /**
+     * Create by applying a relative pose to a base pose.
+     */
     static fromRelativePose(base: GeoPoseBasic | GeoPose, relative: RelativePose): GeoPoseBasic {
         const basePose = base instanceof GeoPoseBasic ? base.toGeoPose() : base;
         return new GeoPoseBasic(applyRelativePose(basePose, relative));
     }
 
+    /**
+     * Parse a JSON string containing a Basic Quaternion GeoPose.
+     */
     static fromGeoPoseJSON(json: string): GeoPoseBasic | null {
         return GeoPoseBasic.fromJSONWithMode(json, 'bq');
     }
 
+    /**
+     * Parse a JSON string containing a Basic YPR GeoPose.
+     */
     static fromGeoPoseYPRJSON(json: string): GeoPoseBasic | null {
         return GeoPoseBasic.fromJSONWithMode(json, 'ypr');
     }
 
+    /**
+     * Parse a JSON string containing either Basic Quaternion or Basic YPR.
+     */
     static fromJSON(json: string): GeoPoseBasic | null {
         return GeoPoseBasic.fromJSONWithMode(json, 'auto');
     }
 
+    /**
+     * Build from a JS object that matches GeoPose or GeoPoseBYPR.
+     */
     static fromObject(value: unknown): GeoPoseBasic | null {
         if (isGeoPose(value)) {
             return new GeoPoseBasic(value);
@@ -122,6 +166,9 @@ export class GeoPoseBasic {
         return null;
     }
 
+    /**
+     * Internal JSON parser with explicit mode control.
+     */
     private static fromJSONWithMode(
         json: string,
         mode: 'auto' | 'bq' | 'ypr'
@@ -151,6 +198,9 @@ export class GeoPoseBasic {
     // Accessors
     // ---------------------------------------------------------------------
 
+    /**
+     * Get a copy of the current position (LLH).
+     */
     get position(): LLH {
         return { ...this._position };
     }
@@ -159,6 +209,9 @@ export class GeoPoseBasic {
         this.setPosition(value);
     }
 
+    /**
+     * Get a copy of the current orientation quaternion.
+     */
     get quaternion(): Quaternion {
         return { ...this._quaternion };
     }
@@ -167,6 +220,9 @@ export class GeoPoseBasic {
         this.setOrientation(value);
     }
 
+    /**
+     * Latitude in degrees.
+     */
     get lat(): number {
         return this._position.lat;
     }
@@ -175,6 +231,9 @@ export class GeoPoseBasic {
         this._position.lat = value;
     }
 
+    /**
+     * Longitude in degrees.
+     */
     get lon(): number {
         return this._position.lon;
     }
@@ -183,6 +242,9 @@ export class GeoPoseBasic {
         this._position.lon = value;
     }
 
+    /**
+     * Height in meters above the WGS84 ellipsoid.
+     */
     get h(): number {
         return this._position.h;
     }
@@ -191,6 +253,9 @@ export class GeoPoseBasic {
         this._position.h = value;
     }
 
+    /**
+     * Quaternion x component (auto-normalizes on set).
+     */
     get qx(): number {
         return this._quaternion.x;
     }
@@ -199,6 +264,9 @@ export class GeoPoseBasic {
         this._quaternion = normalizeQuaternion({ ...this._quaternion, x: value });
     }
 
+    /**
+     * Quaternion y component (auto-normalizes on set).
+     */
     get qy(): number {
         return this._quaternion.y;
     }
@@ -207,6 +275,9 @@ export class GeoPoseBasic {
         this._quaternion = normalizeQuaternion({ ...this._quaternion, y: value });
     }
 
+    /**
+     * Quaternion z component (auto-normalizes on set).
+     */
     get qz(): number {
         return this._quaternion.z;
     }
@@ -215,6 +286,9 @@ export class GeoPoseBasic {
         this._quaternion = normalizeQuaternion({ ...this._quaternion, z: value });
     }
 
+    /**
+     * Quaternion w component (auto-normalizes on set).
+     */
     get qw(): number {
         return this._quaternion.w;
     }
@@ -223,6 +297,9 @@ export class GeoPoseBasic {
         this._quaternion = normalizeQuaternion({ ...this._quaternion, w: value });
     }
 
+    /**
+     * Yaw in degrees (0 = North, 90 = East).
+     */
     get yaw(): number {
         return this.toGeoPoseYPR().angles.yaw;
     }
@@ -232,6 +309,9 @@ export class GeoPoseBasic {
         this.setYPROrientation(value, ypr.angles.pitch, ypr.angles.roll);
     }
 
+    /**
+     * Yaw in degrees (alias for yaw).
+     */
     get yawDegrees(): number {
         return this.yaw;
     }
@@ -240,6 +320,9 @@ export class GeoPoseBasic {
         this.yaw = value;
     }
 
+    /**
+     * Pitch in degrees (positive = looking up).
+     */
     get pitch(): number {
         return this.toGeoPoseYPR().angles.pitch;
     }
@@ -249,6 +332,9 @@ export class GeoPoseBasic {
         this.setYPROrientation(ypr.angles.yaw, value, ypr.angles.roll);
     }
 
+    /**
+     * Roll in degrees (positive = banking right).
+     */
     get roll(): number {
         return this.toGeoPoseYPR().angles.roll;
     }
@@ -258,6 +344,9 @@ export class GeoPoseBasic {
         this.setYPROrientation(ypr.angles.yaw, ypr.angles.pitch, value);
     }
 
+    /**
+     * Heading in degrees (alias for yaw).
+     */
     get heading(): number {
         return this.yaw;
     }
@@ -266,6 +355,9 @@ export class GeoPoseBasic {
         this.yaw = value;
     }
 
+    /**
+     * Heading in degrees (alias for heading).
+     */
     get headingDegrees(): number {
         return this.heading;
     }
@@ -274,6 +366,9 @@ export class GeoPoseBasic {
         this.heading = value;
     }
 
+    /**
+     * Tilt in degrees (alias for pitch).
+     */
     get tilt(): number {
         return this.pitch;
     }
@@ -282,6 +377,9 @@ export class GeoPoseBasic {
         this.pitch = value;
     }
 
+    /**
+     * Bank in degrees (alias for roll).
+     */
     get bank(): number {
         return this.roll;
     }
@@ -290,6 +388,9 @@ export class GeoPoseBasic {
         this.roll = value;
     }
 
+    /**
+     * Pitch in degrees (alias for pitch).
+     */
     get pitchDegrees(): number {
         return this.pitch;
     }
@@ -298,6 +399,9 @@ export class GeoPoseBasic {
         this.pitch = value;
     }
 
+    /**
+     * Roll in degrees (alias for roll).
+     */
     get rollDegrees(): number {
         return this.roll;
     }
@@ -306,6 +410,9 @@ export class GeoPoseBasic {
         this.roll = value;
     }
 
+    /**
+     * Yaw in radians.
+     */
     get yawRad(): number {
         return degToRad(this.yaw);
     }
@@ -314,6 +421,9 @@ export class GeoPoseBasic {
         this.yaw = radToDeg(value);
     }
 
+    /**
+     * Pitch in radians.
+     */
     get pitchRad(): number {
         return degToRad(this.pitch);
     }
@@ -322,6 +432,9 @@ export class GeoPoseBasic {
         this.pitch = radToDeg(value);
     }
 
+    /**
+     * Roll in radians.
+     */
     get rollRad(): number {
         return degToRad(this.roll);
     }
@@ -330,6 +443,9 @@ export class GeoPoseBasic {
         this.roll = radToDeg(value);
     }
 
+    /**
+     * Heading in radians (alias for yawRad).
+     */
     get headingRad(): number {
         return degToRad(this.heading);
     }
@@ -338,6 +454,9 @@ export class GeoPoseBasic {
         this.heading = radToDeg(value);
     }
 
+    /**
+     * Tilt in radians (alias for pitchRad).
+     */
     get tiltRad(): number {
         return degToRad(this.tilt);
     }
@@ -346,6 +465,9 @@ export class GeoPoseBasic {
         this.tilt = radToDeg(value);
     }
 
+    /**
+     * Bank in radians (alias for rollRad).
+     */
     get bankRad(): number {
         return degToRad(this.bank);
     }
@@ -354,6 +476,9 @@ export class GeoPoseBasic {
         this.bank = radToDeg(value);
     }
 
+    /**
+     * Export the current state as a Basic Quaternion GeoPose.
+     */
     toGeoPose(): GeoPose {
         return {
             position: { ...this._position },
@@ -361,38 +486,63 @@ export class GeoPoseBasic {
         };
     }
 
+    /**
+     * Serialize the Basic Quaternion GeoPose to JSON.
+     */
     toGeoPoseJSON(prettyPrint: boolean = false): string {
         const pose = this.toGeoPose();
         return prettyPrint ? JSON.stringify(pose, null, 2) : JSON.stringify(pose);
     }
 
+    /**
+     * Convert the current pose to Basic YPR.
+     */
     toGeoPoseYPR(): GeoPoseBYPR {
         return quaternionToYPR(this.toGeoPose());
     }
 
+    /**
+     * Serialize the Basic YPR pose to JSON.
+     */
     toGeoPoseYPRJSON(prettyPrint: boolean = false): string {
         const ypr = this.toGeoPoseYPR();
         return prettyPrint ? JSON.stringify(ypr, null, 2) : JSON.stringify(ypr);
     }
 
+    /**
+     * Convert the current pose to ECEF coordinates + orientation.
+     */
     toECEF(): { position: ECEF; orientation: Quaternion } {
         return geoPoseToECEF(this.toGeoPose());
     }
 
+    /**
+     * Convert the current pose to local ENU coordinates at the given origin.
+     */
     toLocalENU(origin: LLH): { position: ENU; orientation: Quaternion } {
         return geoPoseToLocalENU(this.toGeoPose(), origin);
     }
 
+    /**
+     * Get the relative pose from this pose to a target pose.
+     */
     getRelativePoseTo(target: GeoPoseBasic | GeoPose): RelativePose {
         const targetPose = target instanceof GeoPoseBasic ? target.toGeoPose() : target;
         return getRelativePose(this.toGeoPose(), targetPose);
     }
 
+    /**
+     * Interpolate toward a target pose using ECEF lerp + quaternion slerp.
+     * @param t Interpolation factor in [0, 1].
+     */
     interpolateTo(target: GeoPoseBasic | GeoPose, t: number): GeoPoseBasic {
         const targetPose = target instanceof GeoPoseBasic ? target.toGeoPose() : target;
         return new GeoPoseBasic(interpolatePose(this.toGeoPose(), targetPose, t));
     }
 
+    /**
+     * Create a deep copy of this GeoPoseBasic.
+     */
     clone(): GeoPoseBasic {
         return new GeoPoseBasic(this.toGeoPose());
     }
@@ -401,26 +551,41 @@ export class GeoPoseBasic {
     // Mutators
     // ---------------------------------------------------------------------
 
+    /**
+     * Replace the internal pose using a Basic Quaternion GeoPose.
+     */
     setGeoPose(pose: GeoPose): this {
         this._position = { ...pose.position };
         this._quaternion = { ...pose.quaternion };
         return this;
     }
 
+    /**
+     * Replace the internal position.
+     */
     setPosition(position: LLH): this {
         this._position = { ...position };
         return this;
     }
 
+    /**
+     * Replace the internal position using lat/lon/height.
+     */
     setPositionLatLonHeight(lat: number, lon: number, h: number): this {
         return this.setPosition({ lat, lon, h });
     }
 
+    /**
+     * Set quaternion orientation by components (auto-normalized).
+     */
     setQuaternionOrientation(x: number, y: number, z: number, w: number): this {
         this._quaternion = normalizeQuaternion({ x, y, z, w });
         return this;
     }
 
+    /**
+     * Set quaternion orientation from a Quaternion object.
+     */
     setOrientation(quaternion: Quaternion): this {
         return this.setQuaternionOrientation(
             quaternion.x,
@@ -430,6 +595,9 @@ export class GeoPoseBasic {
         );
     }
 
+    /**
+     * Set orientation from yaw/pitch/roll in degrees.
+     */
     setYPROrientation(yaw: number, pitch: number, roll: number): this {
         const pose = yprToQuaternion({
             position: { ...this._position },
@@ -440,6 +608,9 @@ export class GeoPoseBasic {
         return this;
     }
 
+    /**
+     * Translate by an ENU vector in meters.
+     */
     translateENU(enu: ENU): this {
         const pose = translateGeoPose(this.toGeoPose(), enu);
         this._position = { ...pose.position };
@@ -447,40 +618,67 @@ export class GeoPoseBasic {
         return this;
     }
 
+    /**
+     * Translate by explicit east/north/up distances (meters).
+     */
     translateBy(east: number, north: number, up: number): this {
         return this.translateENU({ east, north, up });
     }
 
+    /**
+     * Translate north by meters.
+     */
     translateNorth(northMeters: number): this {
         return this.translateENU({ east: 0, north: northMeters, up: 0 });
     }
 
+    /**
+     * Translate east by meters.
+     */
     translateEast(eastMeters: number): this {
         return this.translateENU({ east: eastMeters, north: 0, up: 0 });
     }
 
+    /**
+     * Translate up by meters.
+     */
     translateUp(upMeters: number): this {
         return this.translateENU({ east: 0, north: 0, up: upMeters });
     }
 
+    /**
+     * Rotate around the local up axis by degrees (yaw delta).
+     */
     rotateAroundUpAxis(degrees: number): this {
         return this.rotateByYPRDelta({ yaw: degrees, pitch: 0, roll: 0 });
     }
 
+    /**
+     * Rotate around the local north axis by degrees (pitch delta).
+     */
     rotateAroundNorthAxis(degrees: number): this {
         return this.rotateByYPRDelta({ yaw: 0, pitch: degrees, roll: 0 });
     }
 
+    /**
+     * Rotate around the local east axis by degrees (roll delta).
+     */
     rotateAroundEastAxis(degrees: number): this {
         return this.rotateByYPRDelta({ yaw: 0, pitch: 0, roll: degrees });
     }
 
+    /**
+     * Apply a quaternion rotation to the current orientation.
+     */
     rotateByQuaternion(rotation: Quaternion): this {
         const rotated = multiplyQuaternions(rotation, this._quaternion);
         this._quaternion = normalizeQuaternion(rotated);
         return this;
     }
 
+    /**
+     * Apply a relative pose (translation + rotation) to this pose.
+     */
     applyRelativePose(relative: RelativePose): this {
         const pose = applyRelativePose(this.toGeoPose(), relative);
         this._position = { ...pose.position };
@@ -488,6 +686,9 @@ export class GeoPoseBasic {
         return this;
     }
 
+    /**
+     * Normalize the internal quaternion to unit length.
+     */
     normalizeOrientation(): this {
         this._quaternion = normalizeQuaternion(this._quaternion);
         return this;
@@ -497,6 +698,9 @@ export class GeoPoseBasic {
     // Internal helpers
     // ---------------------------------------------------------------------
 
+    /**
+     * Internal helper for applying a YPR delta in degrees.
+     */
     private rotateByYPRDelta(delta: { yaw: number; pitch: number; roll: number }): this {
         const ypr = quaternionToYPR(this.toGeoPose());
         return this.setYPROrientation(
@@ -507,27 +711,44 @@ export class GeoPoseBasic {
     }
 }
 
+/**
+ * Return the identity quaternion.
+ */
 function identityQuaternion(): Quaternion {
     return { x: 0, y: 0, z: 0, w: 1 };
 }
 
+/** Degrees-to-radians conversion factor. */
 const DEG_TO_RAD = Math.PI / 180;
+/** Radians-to-degrees conversion factor. */
 const RAD_TO_DEG = 180 / Math.PI;
 
+/**
+ * Convert degrees to radians.
+ */
 function degToRad(deg: number): number {
     return deg * DEG_TO_RAD;
 }
 
+/**
+ * Convert radians to degrees.
+ */
 function radToDeg(rad: number): number {
     return rad * RAD_TO_DEG;
 }
 
+/**
+ * Normalize a quaternion to unit length.
+ */
 function normalizeQuaternion(q: Quaternion): Quaternion {
     const mag = Math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
     if (mag === 0) return identityQuaternion();
     return { x: q.x / mag, y: q.y / mag, z: q.z / mag, w: q.w / mag };
 }
 
+/**
+ * Multiply two quaternions (a * b).
+ */
 function multiplyQuaternions(a: Quaternion, b: Quaternion): Quaternion {
     return {
         x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
@@ -537,6 +758,9 @@ function multiplyQuaternions(a: Quaternion, b: Quaternion): Quaternion {
     };
 }
 
+/**
+ * Type guard for GeoPose (Basic Quaternion).
+ */
 function isGeoPose(value: unknown): value is GeoPose {
     if (!value || typeof value !== 'object') return false;
     const obj = value as Record<string, unknown>;
@@ -557,6 +781,9 @@ function isGeoPose(value: unknown): value is GeoPose {
     );
 }
 
+/**
+ * Type guard for GeoPoseBYPR (Basic YPR).
+ */
 function isGeoPoseBYPR(value: unknown): value is GeoPoseBYPR {
     if (!value || typeof value !== 'object') return false;
     const obj = value as Record<string, unknown>;

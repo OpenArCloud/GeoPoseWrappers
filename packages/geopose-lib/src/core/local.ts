@@ -1,10 +1,12 @@
 import { GeoPose, ENU, LLH, Quaternion, WGS84 } from '../types.js';
 import { geoPoseToECEF, ecefToGeoPose } from './conversions.js';
 
+/** Degrees-to-radians conversion factor. */
 const DEG_TO_RAD = Math.PI / 180;
 
 /**
- * Express a GeoPose relative to a local ENU tangent plane at a given origin.
+ * Express a GeoPose in the local ENU tangent plane of an origin.
+ * Returns the target position/orientation relative to the origin frame.
  */
 export function geoPoseToLocalENU(geoPose: GeoPose, origin: LLH): { position: ENU; orientation: Quaternion } {
     // 1. Convert Target and Origin to ECEF
@@ -66,7 +68,8 @@ export function geoPoseToLocalENU(geoPose: GeoPose, origin: LLH): { position: EN
 }
 
 /**
- * Convert local ENU coordinates back to global GeoPose.
+ * Convert local ENU coordinates back to a global GeoPose.
+ * The origin defines the tangent plane for the ENU inputs.
  */
 export function localENUToGeoPose(enu: ENU, orientation: Quaternion, origin: LLH): GeoPose {
     // 1. Convert Origin to ECEF
@@ -115,7 +118,7 @@ export function localENUToGeoPose(enu: ENU, orientation: Quaternion, origin: LLH
 }
 
 /**
- * Move a GeoPose by an ENU offset.
+ * Translate a GeoPose by an ENU offset in its own local frame.
  */
 export function translateGeoPose(geoPose: GeoPose, translation: ENU): GeoPose {
     // 1. Convert to Local ENU at its OWN position (Origin = self)
@@ -126,11 +129,11 @@ export function translateGeoPose(geoPose: GeoPose, translation: ENU): GeoPose {
     return localENUToGeoPose(translation, geoPose.quaternion, geoPose.position);
 }
 
-// --- Helpers duplicate from conversions (to avoid circular deps if I used them, but I can copy for speed) ---
-// Actually, I should export them or make a common utils. 
-// For now, I'll re-implement the matrix helpers locally or move them to a utils file.
-// Ideally, `conversions.ts` should export them. I'll duplicate strictly for speed and isolation now.
+// --- Helpers duplicated from conversions to avoid circular dependencies. ---
 
+/**
+ * Return the rotation from ENU to ECEF at a given lat/lon (radians).
+ */
 function getEnuToEcefRotation(lat: number, lon: number): Quaternion {
     const cl = Math.cos(lat);
     const sl = Math.sin(lat);
@@ -144,6 +147,9 @@ function getEnuToEcefRotation(lat: number, lon: number): Quaternion {
     return matrixToQuaternion(m00, m01, m02, m10, m11, m12, m20, m21, m22);
 }
 
+/**
+ * Convert a 3x3 rotation matrix to a quaternion.
+ */
 function matrixToQuaternion(
     m00: number, m01: number, m02: number,
     m10: number, m11: number, m12: number,
@@ -183,6 +189,9 @@ function matrixToQuaternion(
     return { x, y, z, w };
 }
 
+/**
+ * Multiply two quaternions (a * b).
+ */
 function multiplyQuaternions(a: Quaternion, b: Quaternion): Quaternion {
     return {
         x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
@@ -192,6 +201,9 @@ function multiplyQuaternions(a: Quaternion, b: Quaternion): Quaternion {
     };
 }
 
+/**
+ * Conjugate a quaternion (invert rotation for unit quaternions).
+ */
 function conjugateQuaternion(q: Quaternion): Quaternion {
     return { x: -q.x, y: -q.y, z: -q.z, w: q.w };
 }
