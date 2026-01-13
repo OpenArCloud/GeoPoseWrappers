@@ -1,0 +1,67 @@
+export type Landmark = {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+  h: number;
+  cameraH: number;
+};
+
+export const landmarks: Landmark[] = [
+  {
+    id: "statue-liberty",
+    name: "Statue of Liberty",
+    lat: 40.689249,
+    lon: -74.0445,
+    h: 50,
+    cameraH: 900
+  },
+  {
+    id: "eiffel-tower",
+    name: "Eiffel Tower",
+    lat: 48.85837,
+    lon: 2.294481,
+    h: 60,
+    cameraH: 900
+  },
+  {
+    id: "sydney-opera-house",
+    name: "Sydney Opera House",
+    lat: -33.856784,
+    lon: 151.215297,
+    h: 40,
+    cameraH: 800
+  },
+  {
+    id: "big-ben",
+    name: "Big Ben",
+    lat: 51.500729,
+    lon: -0.124625,
+    h: 50,
+    cameraH: 800
+  },
+  {
+    id: "burj-khalifa",
+    name: "Burj Khalifa",
+    lat: 25.197197,
+    lon: 55.274376,
+    h: 80,
+    cameraH: 1200
+  },
+  {
+    id: "christ-redeemer",
+    name: "Christ the Redeemer",
+    lat: -22.951916,
+    lon: -43.210487,
+    h: 80,
+    cameraH: 1000
+  },
+  {
+    id: "golden-gate-bridge",
+    name: "Golden Gate Bridge",
+    lat: 37.819929,
+    lon: -122.478255,
+    h: 60,
+    cameraH: 900
+  }
+];

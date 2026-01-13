@@ -11,10 +11,25 @@ Interactive demo showcasing the GeoPose ↔ Cesium converter library, enabling i
 
 ```bash
 # Navigate to this directory
-cd sandbox/cesium-demo
+cd sandbox/cesium-transforms-test
 
 # Install dependencies
 npm install
+```
+
+## Environment Setup
+
+Create a local env file for API keys:
+
+```bash
+cp .env.example .env.local
+```
+
+Then fill in values as needed:
+
+```
+VITE_CESIUM_ION_TOKEN=your-cesium-ion-token
+VITE_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
 ```
 
 ## Running the Demo
@@ -50,17 +65,10 @@ The demo works without a token using basic OpenStreetMap imagery. For higher-qua
 
 ### Adding Your Token
 
-Edit `src/App.svelte` and add your token at the top of the `onMount` function:
+Set `VITE_CESIUM_ION_TOKEN` in `.env.local`:
 
-```typescript
-import { Ion } from "cesium";
-
-onMount(async () => {
-  // Add this line with your token
-  Ion.defaultAccessToken = "your-token-here";
-
-  // ... rest of the code
-});
+```
+VITE_CESIUM_ION_TOKEN=your-cesium-ion-token
 ```
 
 ### What the Token Enables
@@ -71,6 +79,16 @@ onMount(async () => {
 | Terrain | Flat ellipsoid | Cesium World Terrain (3D mountains) |
 | Geocoder search | Disabled | Enabled |
 | Other Ion assets | No | Yes |
+
+## Google Photorealistic 3D Tiles (Optional)
+
+To enable Google Photorealistic 3D Tiles, add your Google Maps API key:
+
+```
+VITE_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
+```
+
+Then use the **"Enable Photorealistic Tiles"** button in the UI.
 
 ## Features
 
