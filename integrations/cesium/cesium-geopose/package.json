@@ -1,0 +1,53 @@
+{
+  "name": "cesium-geopose",
+  "version": "0.0.1",
+  "description": "Cesium integration helpers for OGC GeoPose.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "geopose",
+    "cesium",
+    "ogc",
+    "geospatial"
+  ],
+  "author": "Open AR Cloud Association",
+  "license": "MIT",
+  "homepage": "https://github.com/OpenArCloud/GeoPoseWrappers/tree/main/integrations/cesium/cesium-geopose",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenArCloud/GeoPoseWrappers.git",
+    "directory": "integrations/cesium/cesium-geopose"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenArCloud/GeoPoseWrappers/issues"
+  },
+  "peerDependencies": {
+    "cesium": "^1.113.0",
+    "geopose-lib": "^0.0.1"
+  },
+  "devDependencies": {
+    "cesium": "^1.113.0",
+    "geopose-lib": "^0.0.1",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
