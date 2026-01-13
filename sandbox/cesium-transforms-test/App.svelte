@@ -17,7 +17,7 @@
     getEntityGeoPose,
     setEntityGeoPose,
     createEntityFromGeoPose,
-    type GeoPoseBQ,
+    type GeoPose,
   } from "./src/lib/GeoPoseConverter";
 
   let cesiumContainer: HTMLDivElement;
@@ -25,13 +25,13 @@
   let demoEntity: Entity | null = null;
 
   // Camera GeoPose state
-  let cameraGeoPose: GeoPoseBQ = {
+  let cameraGeoPose: GeoPose = {
     position: { lat: 0, lon: 0, h: 10000000 },
     quaternion: { x: 0, y: 0, z: 0, w: 1 },
   };
 
   // Entity GeoPose state
-  let entityGeoPose: GeoPoseBQ = {
+  let entityGeoPose: GeoPose = {
     position: { lat: 40.7128, lon: -74.006, h: 500 },
     quaternion: { x: 0, y: 0, z: 0, w: 1 },
   };
@@ -92,7 +92,7 @@
   function flyToInput() {
     if (!viewer) return;
 
-    const geoPose: GeoPoseBQ = {
+    const geoPose: GeoPose = {
       position: { lat: inputLat, lon: inputLon, h: inputHeight },
       quaternion: hprToQuat(inputHeading, inputPitch, inputRoll),
     };
@@ -104,7 +104,7 @@
   function setCameraInstant() {
     if (!viewer) return;
 
-    const geoPose: GeoPoseBQ = {
+    const geoPose: GeoPose = {
       position: { lat: inputLat, lon: inputLon, h: inputHeight },
       quaternion: hprToQuat(inputHeading, inputPitch, inputRoll),
     };
@@ -125,7 +125,7 @@
   function updateEntity() {
     if (!viewer) return;
 
-    const geoPose: GeoPoseBQ = {
+    const geoPose: GeoPose = {
       position: { lat: entityLat, lon: entityLon, h: entityHeight },
       quaternion: hprToQuat(entityHeading, entityPitch, entityRoll),
     };
@@ -176,7 +176,7 @@
   }
 
   // Copy GeoPose JSON to clipboard
-  function copyGeoPoseJSON(pose: GeoPoseBQ, type: string) {
+  function copyGeoPoseJSON(pose: GeoPose, type: string) {
     const json = JSON.stringify(pose, null, 2);
     navigator.clipboard.writeText(json);
     alert(`${type} GeoPose copied to clipboard!`);

@@ -1,24 +1,27 @@
-import { GeoPoseBQ, GeoPoseBYPR, ECEF, Quaternion, WGS84 } from '../types.js';
+import { GeoPose, GeoPoseBYPR, ECEF, Quaternion, WGS84 } from '../types.js';
+
+const DEG_TO_RAD = Math.PI / 180;
+const RAD_TO_DEG = 180 / Math.PI;
 
 /**
  * Converts Degrees to Radians
  */
 function degToRad(deg: number): number {
-    return deg * (Math.PI / 180);
+    return deg * DEG_TO_RAD;
 }
 
 /**
  * Converts Radians to Degrees
  */
 function radToDeg(rad: number): number {
-    return rad * (180 / Math.PI);
+    return rad * RAD_TO_DEG;
 }
 
 /**
  * Convert Basic-Quaternion to Basic-YPR representation.
  * Convention: Z-Y-X intrinsic rotations (Yaw -> Pitch -> Roll)
  */
-export function quaternionToYPR(geoPose: GeoPoseBQ): GeoPoseBYPR {
+export function quaternionToYPR(geoPose: GeoPose): GeoPoseBYPR {
     const q = geoPose.quaternion;
 
     // Roll (x-axis rotation)
@@ -53,7 +56,7 @@ export function quaternionToYPR(geoPose: GeoPoseBQ): GeoPoseBYPR {
  * Convert Basic-YPR to Basic-Quaternion representation.
  * Convention: Z-Y-X intrinsic rotations (Yaw -> Pitch -> Roll)
  */
-export function yprToQuaternion(geoPose: GeoPoseBYPR): GeoPoseBQ {
+export function yprToQuaternion(geoPose: GeoPoseBYPR): GeoPose {
     const yaw = degToRad(geoPose.angles.yaw);
     const pitch = degToRad(geoPose.angles.pitch);
     const roll = degToRad(geoPose.angles.roll);
@@ -79,7 +82,7 @@ export function yprToQuaternion(geoPose: GeoPoseBYPR): GeoPoseBQ {
 /**
  * Convert Geodetic (Lat/Lon/H) to ECEF XYZ using WGS84 parameters.
  */
-export function geoPoseToECEF(geoPose: GeoPoseBQ): { position: ECEF; orientation: Quaternion } {
+export function geoPoseToECEF(geoPose: GeoPose): { position: ECEF; orientation: Quaternion } {
     const lat = degToRad(geoPose.position.lat);
     const lon = degToRad(geoPose.position.lon);
     const h = geoPose.position.h;
@@ -125,7 +128,7 @@ export function geoPoseToECEF(geoPose: GeoPoseBQ): { position: ECEF; orientation
  * Convert ECEF XYZ to Geodetic (Lat/Lon/H) using WGS84.
  * Uses iterative method for high precision.
  */
-export function ecefToGeoPose(ecef: ECEF, orientation: Quaternion): GeoPoseBQ {
+export function ecefToGeoPose(ecef: ECEF, orientation: Quaternion): GeoPose {
     const x = ecef.x;
     const y = ecef.y;
     const z = ecef.z;

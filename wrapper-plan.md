@@ -18,15 +18,15 @@ https://developer.apple.com/documentation/arkit/argeoanchor
 Can you propose a set of useful generic transform methods for the GeoPose-transforms library (not implementing it just yet).
 
 ## Fourth task:
-Create a Cesium extension/library that enables getting and setting poses using GeoPoseBQ format:
+Create a Cesium extension/library that enables getting and setting poses using GeoPose format:
 
 **Camera Operations:**
-- `getGeoPose(camera): GeoPoseBQ` - Get current camera pose as GeoPose
-- `setGeoPose(camera, geoPose: GeoPoseBQ)` - Set camera pose from GeoPose
+- `getGeoPose(camera): GeoPose` - Get current camera pose as GeoPose
+- `setGeoPose(camera, geoPose: GeoPose)` - Set camera pose from GeoPose
 
 **Entity/Object Operations:**
-- `getEntityGeoPose(entity): GeoPoseBQ` - Get an entity's pose as GeoPose
-- `setEntityGeoPose(entity, geoPose: GeoPoseBQ)` - Set an entity's pose from GeoPose
+- `getEntityGeoPose(entity): GeoPose` - Get an entity's pose as GeoPose
+- `setEntityGeoPose(entity, geoPose: GeoPose)` - Set an entity's pose from GeoPose
 
 **Implementation Notes:**
 - Cesium uses a right-handed ECEF coordinate system

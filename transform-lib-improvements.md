@@ -53,9 +53,9 @@
   - `Projected` (x, y, z, projection id / proj string).
 - Add APIs:
   - `geoPoseToUTM(geoPose): { position: UTM & { h }, orientation }`
-  - `utmToGeoPose(utm, orientation): GeoPoseBQ`
+  - `utmToGeoPose(utm, orientation): GeoPose`
   - `geoPoseToProjected(geoPose, projection): { position: { x, y, z }, orientation }`
-  - `projectedToGeoPose(projected, projection, orientation): GeoPoseBQ`
+  - `projectedToGeoPose(projected, projection, orientation): GeoPose`
 - Implementation approach:
   - Implement UTM directly (zone, false easting/northing, hemisphere rules).
   - For generic projections, add an optional adapter to `proj4` (behind a thin interface).

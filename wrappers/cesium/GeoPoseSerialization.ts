@@ -2,7 +2,7 @@
  * GeoPose JSON Serialization/Deserialization
  *
  * Provides OGC-compliant JSON serialization and deserialization for GeoPose
- * Basic-Quaternion (BQ) and Basic-YPR formats.
+ * Basic-Quaternion and Basic-YPR formats.
  *
  * OGC GeoPose 1.0 Standard: https://docs.ogc.org/is/21-056r11/21-056r11.html
  * JSON Schemas: https://schemas.opengis.net/geopose/1.0/schemata/
@@ -13,9 +13,9 @@
 // ============================================================================
 
 /**
- * OGC GeoPose Basic Quaternion representation
+ * OGC GeoPose (Basic Quaternion) representation
  */
-export interface GeoPoseBQ {
+export interface GeoPose {
   position: {
     lat: number; // Latitude in degrees (WGS84), -90 to 90
     lon: number; // Longitude in degrees (WGS84), -180 to 180
@@ -58,13 +58,13 @@ export interface ValidationResult {
 // ============================================================================
 
 /**
- * Serialize GeoPose Basic-Quaternion to OGC-compliant JSON string
+ * Serialize GeoPose (Basic Quaternion) to OGC-compliant JSON string
  * @param geoPose - GeoPose object to serialize
  * @param prettyPrint - If true, format with indentation (default: false)
  * @returns JSON string
  */
 export function serializeGeoPose(
-  geoPose: GeoPoseBQ,
+  geoPose: GeoPose,
   prettyPrint: boolean = false
 ): string {
   return prettyPrint ? JSON.stringify(geoPose, null, 2) : JSON.stringify(geoPose);
@@ -90,7 +90,7 @@ export function serializeGeoPoseYPR(
  * @returns JSON array string
  */
 export function serializeGeoPoseArray(
-  poses: GeoPoseBQ[],
+  poses: GeoPose[],
   prettyPrint: boolean = false
 ): string {
   return prettyPrint ? JSON.stringify(poses, null, 2) : JSON.stringify(poses);
@@ -101,17 +101,17 @@ export function serializeGeoPoseArray(
 // ============================================================================
 
 /**
- * Deserialize GeoPose Basic-Quaternion from JSON string
+ * Deserialize GeoPose (Basic Quaternion) from JSON string
  * @param json - OGC-compliant GeoPose JSON string
- * @returns GeoPoseBQ or null if parsing fails
+ * @returns GeoPose or null if parsing fails
  */
-export function deserializeGeoPose(json: string): GeoPoseBQ | null {
+export function deserializeGeoPose(json: string): GeoPose | null {
   try {
     const parsed = JSON.parse(json);
-    if (!isGeoPoseBQStructure(parsed)) {
+    if (!isGeoPoseStructure(parsed)) {
       return null;
     }
-    return parsed as GeoPoseBQ;
+    return parsed as GeoPose;
   } catch {
     return null;
   }
@@ -137,30 +137,30 @@ export function deserializeGeoPoseYPR(json: string): GeoPoseBYPR | null {
 /**
  * Deserialize array of GeoPoses from JSON string
  * @param json - JSON array string
- * @returns Array of GeoPoseBQ (empty if parsing fails)
+ * @returns Array of GeoPose (empty if parsing fails)
  */
-export function deserializeGeoPoseArray(json: string): GeoPoseBQ[] {
+export function deserializeGeoPoseArray(json: string): GeoPose[] {
   try {
     const parsed = JSON.parse(json);
     if (!Array.isArray(parsed)) {
       return [];
     }
-    return parsed.filter(isGeoPoseBQStructure) as GeoPoseBQ[];
+    return parsed.filter(isGeoPoseStructure) as GeoPose[];
   } catch {
     return [];
   }
 }
 
 // ============================================================================
-// Conversion Functions (BQ <-> YPR)
+// Conversion Functions (Basic Quaternion <-> Basic YPR)
 // ============================================================================
 
 /**
- * Convert GeoPose Basic-Quaternion to Basic-YPR
+ * Convert GeoPose (Basic Quaternion) to Basic-YPR
  * @param geoPose - GeoPose with quaternion orientation
  * @returns GeoPose with yaw/pitch/roll angles in degrees
  */
-export function quaternionToYPR(geoPose: GeoPoseBQ): GeoPoseBYPR {
+export function quaternionToYPR(geoPose: GeoPose): GeoPoseBYPR {
   const { x, y, z, w } = geoPose.quaternion;
 
   // Roll (x-axis rotation)
@@ -198,7 +198,7 @@ export function quaternionToYPR(geoPose: GeoPoseBQ): GeoPoseBYPR {
  * @param geoPose - GeoPose with yaw/pitch/roll angles in degrees
  * @returns GeoPose with quaternion orientation
  */
-export function yprToQuaternion(geoPose: GeoPoseBYPR): GeoPoseBQ {
+export function yprToQuaternion(geoPose: GeoPoseBYPR): GeoPose {
   // Convert degrees to radians
   const yawRad = (geoPose.angles.yaw * Math.PI) / 180;
   const pitchRad = (geoPose.angles.pitch * Math.PI) / 180;
@@ -244,14 +244,14 @@ export function yprToQuaternion(geoPose: GeoPoseBYPR): GeoPoseBQ {
 // ============================================================================
 
 /**
- * Check if a JSON string is valid GeoPose BQ format
+ * Check if a JSON string is valid GeoPose (Basic Quaternion) format
  * @param json - JSON string to validate
- * @returns true if valid GeoPose BQ JSON
+ * @returns true if valid GeoPose (Basic Quaternion) JSON
  */
 export function isValidGeoPoseJSON(json: string): boolean {
   try {
     const parsed = JSON.parse(json);
-    return isGeoPoseBQStructure(parsed);
+    return isGeoPoseStructure(parsed);
   } catch {
     return false;
   }
@@ -276,7 +276,7 @@ export function isValidGeoPoseYPRJSON(json: string): boolean {
  * @param geoPose - GeoPose object to validate
  * @returns ValidationResult with valid flag and error messages
  */
-export function validateGeoPose(geoPose: GeoPoseBQ): ValidationResult {
+export function validateGeoPose(geoPose: GeoPose): ValidationResult {
   const errors: string[] = [];
 
   // Check position exists
@@ -415,7 +415,7 @@ export function validateGeoPoseYPR(geoPose: GeoPoseBYPR): ValidationResult {
  * @param geoPose - GeoPose with potentially non-normalized quaternion
  * @returns GeoPose with normalized quaternion
  */
-export function normalizeGeoPose(geoPose: GeoPoseBQ): GeoPoseBQ {
+export function normalizeGeoPose(geoPose: GeoPose): GeoPose {
   const { x, y, z, w } = geoPose.quaternion;
   const mag = Math.sqrt(x * x + y * y + z * z + w * w);
 
@@ -442,9 +442,9 @@ export function normalizeGeoPose(geoPose: GeoPoseBQ): GeoPoseBQ {
 // ============================================================================
 
 /**
- * Check if an object has the structure of GeoPoseBQ
+ * Check if an object has the structure of GeoPose (Basic Quaternion)
  */
-function isGeoPoseBQStructure(obj: unknown): boolean {
+function isGeoPoseStructure(obj: unknown): boolean {
   if (typeof obj !== "object" || obj === null) return false;
   const o = obj as Record<string, unknown>;
 

@@ -1,4 +1,4 @@
-import { GeoPoseBQ, ENU, Quaternion } from '../types.js';
+import { GeoPose, ENU, Quaternion } from '../types.js';
 import { geoPoseToLocalENU, localENUToGeoPose } from './local.js';
 
 /**
@@ -6,7 +6,7 @@ import { geoPoseToLocalENU, localENUToGeoPose } from './local.js';
  * Returns the translation and rotation required to get from 'from' to 'to'
  * in the local frame of 'from'.
  */
-export function getRelativePose(from: GeoPoseBQ, to: GeoPoseBQ): { translation: ENU; rotation: Quaternion } {
+export function getRelativePose(from: GeoPose, to: GeoPose): { translation: ENU; rotation: Quaternion } {
     // This is effectively describing 'to' in the local frame of 'from'.
     return geoPoseToLocalENU(to, from.position);
 }
@@ -14,7 +14,7 @@ export function getRelativePose(from: GeoPoseBQ, to: GeoPoseBQ): { translation: 
 /**
  * Apply a relative transformation to a base GeoPose.
  */
-export function applyRelativePose(base: GeoPoseBQ, relative: { translation: ENU; rotation: Quaternion }): GeoPoseBQ {
+export function applyRelativePose(base: GeoPose, relative: { translation: ENU; rotation: Quaternion }): GeoPose {
     // This is effectively converting a local coordinate back to global.
     return localENUToGeoPose(relative.translation, relative.rotation, base.position);
 }
@@ -23,7 +23,7 @@ export function applyRelativePose(base: GeoPoseBQ, relative: { translation: ENU;
  * Spherical linear interpolation between two poses.
  * t: 0.0 to 1.0
  */
-export function interpolatePose(from: GeoPoseBQ, to: GeoPoseBQ, t: number): GeoPoseBQ {
+export function interpolatePose(from: GeoPose, to: GeoPose, t: number): GeoPose {
     // 1. Interpolate Position
     // Simple linear interpolation of ECEF is usually safest to avoid "going through the earth" for large distances,
     // although for surface movement, Great Circle is better.

@@ -1,0 +1,45 @@
+{
+  "name": "geopose-lib",
+  "version": "0.0.1",
+  "description": "Transforms and helpers for OGC GeoPose (Basic Quaternion and Basic YPR).",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:gen": "tsx test/generate-test-data.ts",
+    "prepublishOnly": "npm test && npm run build"
+  },
+  "keywords": [
+    "geopose",
+    "ogc",
+    "geospatial",
+    "wgs84",
+    "ecef",
+    "enu"
+  ],
+  "author": "Open AR Cloud Association",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.17",
+    "tsx": "^4.7.0"
+  }
+}

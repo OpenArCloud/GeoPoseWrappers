@@ -8,7 +8,7 @@ import {
     ecefToGeoPose,
     geoPoseToLocalENU,
     localENUToGeoPose,
-    GeoPoseBQ,
+    GeoPose,
     WGS84
 } from '../src/index.js';
 
@@ -51,7 +51,7 @@ describe('GeoPose Transforms Library', () => {
         testData.conversions.ecef.forEach((testCase: any, index: number) => {
             const label = `Lat=${testCase.input.lat}, Lon=${testCase.input.lon}`;
             it(`Case ${index}: ${label}`, () => {
-                const inputPose: GeoPoseBQ = {
+                const inputPose: GeoPose = {
                     position: testCase.input,
                     quaternion: { x: 0, y: 0, z: 0, w: 1 }
                 };
@@ -75,7 +75,7 @@ describe('GeoPose Transforms Library', () => {
     describe('Local ENU Operations', () => {
         testData.local.forEach((testCase: any, index: number) => {
             it(`Case ${index}: Local offset checks`, () => {
-                const targetPose: GeoPoseBQ = {
+                const targetPose: GeoPose = {
                     position: testCase.target,
                     quaternion: { x: 0, y: 0, z: 0, w: 1 }
                 };

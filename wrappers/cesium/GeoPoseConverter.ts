@@ -42,10 +42,10 @@ import {
 // ============================================================================
 
 /**
- * OGC GeoPose Basic Quaternion representation
+ * OGC GeoPose (Basic Quaternion) representation
  * Position in WGS84 geodetic coordinates, orientation as quaternion in ENU frame
  */
-export interface GeoPoseBQ {
+export interface GeoPose {
   position: {
     lat: number; // Latitude in degrees (WGS84)
     lon: number; // Longitude in degrees (WGS84)
@@ -174,7 +174,7 @@ function getEnuToEcefMatrix(
  * @param camera - Cesium Camera instance
  * @returns GeoPose with the camera's position and orientation in ENU frame
  */
-export function getCameraGeoPose(camera: Camera): GeoPoseBQ {
+export function getCameraGeoPose(camera: Camera): GeoPose {
   // Get camera position in cartographic coordinates
   const cartographic = camera.positionCartographic;
 
@@ -211,7 +211,7 @@ export function getCameraGeoPose(camera: Camera): GeoPoseBQ {
  * @param camera - Cesium Camera instance
  * @param geoPose - GeoPose with position and orientation in ENU frame
  */
-export function setCameraGeoPose(camera: Camera, geoPose: GeoPoseBQ): void {
+export function setCameraGeoPose(camera: Camera, geoPose: GeoPose): void {
   // Convert position to Cartesian3
   const destination = Cartesian3.fromDegrees(
     geoPose.position.lon,
@@ -242,7 +242,7 @@ export function setCameraGeoPose(camera: Camera, geoPose: GeoPoseBQ): void {
  */
 export function flyCameraToGeoPose(
   camera: Camera,
-  geoPose: GeoPoseBQ,
+  geoPose: GeoPose,
   duration: number = 2
 ): void {
   const destination = Cartesian3.fromDegrees(
@@ -278,7 +278,7 @@ export function flyCameraToGeoPose(
 export function getEntityGeoPose(
   entity: Entity,
   time?: any // JulianDate
-): GeoPoseBQ | null {
+): GeoPose | null {
   if (!entity.position) {
     return null;
   }
@@ -343,7 +343,7 @@ export function getEntityGeoPose(
  * @param entity - Cesium Entity to update
  * @param geoPose - GeoPose with position and orientation in ENU frame
  */
-export function setEntityGeoPose(entity: Entity, geoPose: GeoPoseBQ): void {
+export function setEntityGeoPose(entity: Entity, geoPose: GeoPose): void {
   // Set position
   const positionEcef = Cartesian3.fromDegrees(
     geoPose.position.lon,
@@ -379,7 +379,7 @@ export function setEntityGeoPose(entity: Entity, geoPose: GeoPoseBQ): void {
  * @param geoPose - GeoPose for the entity's position and orientation
  * @returns Object with position and orientation suitable for Entity constructor
  */
-export function createEntityFromGeoPose(geoPose: GeoPoseBQ): {
+export function createEntityFromGeoPose(geoPose: GeoPose): {
   position: Cartesian3;
   orientation: Quaternion;
 } {

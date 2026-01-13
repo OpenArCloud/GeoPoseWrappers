@@ -4,7 +4,7 @@ A core transformation library for working with OGC GeoPose data, providing essen
 
 ## Design Goals
 
-1. **Standards Compliant**: Full support for OGC GeoPose Basic-Quaternion and Basic-YPR encodings
+1. **Standards Compliant**: Full support for OGC GeoPose (Basic Quaternion) and Basic-YPR encodings
 2. **High Precision**: Use double-precision floating point throughout
 3. **Framework Agnostic**: No dependencies on AR/VR frameworks
 4. **Multi-Language**: Initial TypeScript implementation, then port to other languages
@@ -17,8 +17,8 @@ A core transformation library for working with OGC GeoPose data, providing essen
 ### 1. Core Type Definitions
 
 ```typescript
-// OGC GeoPose Basic Quaternion
-interface GeoPoseBQ {
+// OGC GeoPose (Basic Quaternion)
+interface GeoPose {
   position: { lat: number; lon: number; h: number };
   quaternion: { x: number; y: number; z: number; w: number };
 }
@@ -48,10 +48,10 @@ interface UTM {
 
 ### 2. GeoPose ↔ GeoPose Conversions
 
-#### `quaternionToYPR(geoPose: GeoPoseBQ): GeoPoseBYPR`
+#### `quaternionToYPR(geoPose: GeoPose): GeoPoseBYPR`
 Convert Basic-Quaternion to Basic-YPR representation.
 
-#### `yprToQuaternion(geoPose: GeoPoseBYPR): GeoPoseBQ`
+#### `yprToQuaternion(geoPose: GeoPoseBYPR): GeoPose`
 Convert Basic-YPR to Basic-Quaternion representation.
 
 **Use Case**: UI display (YPR is more human-readable), interoperability with systems preferring Euler angles.
@@ -60,10 +60,10 @@ Convert Basic-YPR to Basic-Quaternion representation.
 
 ### 3. GeoPose ↔ ECEF Conversions
 
-#### `geoPoseToECEF(geoPose: GeoPoseBQ): { position: ECEF; orientation: Quaternion }`
+#### `geoPoseToECEF(geoPose: GeoPose): { position: ECEF; orientation: Quaternion }`
 Convert GeoPose to Earth-Centered Earth-Fixed coordinates with orientation expressed relative to ECEF axes.
 
-#### `ecefToGeoPose(ecef: ECEF, orientation: Quaternion): GeoPoseBQ`
+#### `ecefToGeoPose(ecef: ECEF, orientation: Quaternion): GeoPose`
 Convert ECEF position and orientation back to GeoPose.
 
 **Use Case**: Integration with global 3D engines, satellite positioning systems, physics simulations in Earth-centered frames.
@@ -72,10 +72,10 @@ Convert ECEF position and orientation back to GeoPose.
 
 ### 4. GeoPose ↔ Local Tangent Plane (ENU)
 
-#### `geoPoseToLocalENU(geoPose: GeoPoseBQ, origin: LLH): { position: ENU; orientation: Quaternion }`
+#### `geoPoseToLocalENU(geoPose: GeoPose, origin: LLH): { position: ENU; orientation: Quaternion }`
 Express a GeoPose relative to a local ENU tangent plane at a given origin.
 
-#### `localENUToGeoPose(enu: ENU, orientation: Quaternion, origin: LLH): GeoPoseBQ`
+#### `localENUToGeoPose(enu: ENU, orientation: Quaternion, origin: LLH): GeoPose`
 Convert local ENU coordinates back to global GeoPose.
 
 **Use Case**: Local scene rendering, AR applications, surveying, robotics navigation.
@@ -84,10 +84,10 @@ Convert local ENU coordinates back to global GeoPose.
 
 ### 5. GeoPose ↔ UTM Conversions
 
-#### `geoPoseToUTM(geoPose: GeoPoseBQ): { position: UTM & { h: number }; orientation: Quaternion }`
+#### `geoPoseToUTM(geoPose: GeoPose): { position: UTM & { h: number }; orientation: Quaternion }`
 Convert GeoPose position to UTM with height, orientation remains in local tangent frame.
 
-#### `utmToGeoPose(utm: UTM, h: number, orientation: Quaternion): GeoPoseBQ`
+#### `utmToGeoPose(utm: UTM, h: number, orientation: Quaternion): GeoPose`
 Convert UTM coordinates back to GeoPose.
 
 **Use Case**: GIS integration, mapping applications, large-area surveys.
@@ -96,13 +96,13 @@ Convert UTM coordinates back to GeoPose.
 
 ### 6. Relative Pose Operations
 
-#### `getRelativePose(from: GeoPoseBQ, to: GeoPoseBQ): { translation: ENU; rotation: Quaternion }`
+#### `getRelativePose(from: GeoPose, to: GeoPose): { translation: ENU; rotation: Quaternion }`
 Calculate the relative pose between two GeoPoses (how to get from `from` to `to`).
 
-#### `applyRelativePose(base: GeoPoseBQ, relative: { translation: ENU; rotation: Quaternion }): GeoPoseBQ`
+#### `applyRelativePose(base: GeoPose, relative: { translation: ENU; rotation: Quaternion }): GeoPose`
 Apply a relative transformation to a base GeoPose.
 
-#### `interpolatePose(from: GeoPoseBQ, to: GeoPoseBQ, t: number): GeoPoseBQ`
+#### `interpolatePose(from: GeoPose, to: GeoPose, t: number): GeoPose`
 Spherical linear interpolation (SLERP) between two poses (t: 0-1).
 
 **Use Case**: Animation, trajectory planning, pose averaging, smooth transitions.
@@ -111,13 +111,13 @@ Spherical linear interpolation (SLERP) between two poses (t: 0-1).
 
 ### 7. Translation & Movement
 
-#### `translateGeoPose(geoPose: GeoPoseBQ, translation: ENU): GeoPoseBQ`
+#### `translateGeoPose(geoPose: GeoPose, translation: ENU): GeoPose`
 Move a GeoPose by an ENU offset (in the local tangent plane).
 
-#### `translateByBearingDistance(geoPose: GeoPoseBQ, bearing: number, distance: number, deltaH?: number): GeoPoseBQ`
+#### `translateByBearingDistance(geoPose: GeoPose, bearing: number, distance: number, deltaH?: number): GeoPose`
 Move along a bearing (degrees from north) by a distance (meters).
 
-#### `rotateGeoPose(geoPose: GeoPoseBQ, rotation: Quaternion): GeoPoseBQ`
+#### `rotateGeoPose(geoPose: GeoPose, rotation: Quaternion): GeoPose`
 Apply an additional rotation to the pose's orientation.
 
 **Use Case**: Path following, waypoint navigation, viewpoint adjustment.
@@ -126,22 +126,22 @@ Apply an additional rotation to the pose's orientation.
 
 ### 8. Orientation Utilities
 
-#### `getForwardVector(geoPose: GeoPoseBQ): ENU`
+#### `getForwardVector(geoPose: GeoPose): ENU`
 Get the unit vector pointing in the "forward" direction of the pose.
 
-#### `getUpVector(geoPose: GeoPoseBQ): ENU`
+#### `getUpVector(geoPose: GeoPose): ENU`
 Get the unit vector pointing "up" from the pose.
 
-#### `getRightVector(geoPose: GeoPoseBQ): ENU`
+#### `getRightVector(geoPose: GeoPose): ENU`
 Get the unit vector pointing "right" from the pose.
 
-#### `lookAt(position: LLH, target: LLH, up?: ENU): GeoPoseBQ`
+#### `lookAt(position: LLH, target: LLH, up?: ENU): GeoPose`
 Create a GeoPose at `position` oriented to look at `target`.
 
-#### `getHeading(geoPose: GeoPoseBQ): number`
+#### `getHeading(geoPose: GeoPose): number`
 Extract compass heading (degrees from north) from orientation.
 
-#### `getPitch(geoPose: GeoPoseBQ): number`
+#### `getPitch(geoPose: GeoPose): number`
 Extract pitch angle (degrees, positive = looking up).
 
 **Use Case**: Camera control, direction indicators, alignment operations.
@@ -150,13 +150,13 @@ Extract pitch angle (degrees, positive = looking up).
 
 ### 9. Distance & Geometry
 
-#### `distanceBetween(pose1: GeoPoseBQ, pose2: GeoPoseBQ): number`
+#### `distanceBetween(pose1: GeoPose, pose2: GeoPose): number`
 Calculate geodesic distance between two poses (meters).
 
-#### `bearing(from: GeoPoseBQ, to: GeoPoseBQ): number`
+#### `bearing(from: GeoPose, to: GeoPose): number`
 Calculate initial bearing from one pose to another (degrees).
 
-#### `midpoint(pose1: GeoPoseBQ, pose2: GeoPoseBQ): GeoPoseBQ`
+#### `midpoint(pose1: GeoPose, pose2: GeoPose): GeoPose`
 Calculate the geographic midpoint (orientation averaged).
 
 **Use Case**: Proximity detection, navigation, spatial queries.
@@ -165,13 +165,13 @@ Calculate the geographic midpoint (orientation averaged).
 
 ### 10. Validation & Normalization
 
-#### `isValidGeoPose(geoPose: GeoPoseBQ): boolean`
+#### `isValidGeoPose(geoPose: GeoPose): boolean`
 Check if a GeoPose has valid coordinates and normalized quaternion.
 
-#### `normalizeGeoPose(geoPose: GeoPoseBQ): GeoPoseBQ`
+#### `normalizeGeoPose(geoPose: GeoPose): GeoPose`
 Normalize quaternion and clamp coordinates to valid ranges.
 
-#### `areApproximatelyEqual(pose1: GeoPoseBQ, pose2: GeoPoseBQ, tolerance?: { position: number; angle: number }): boolean`
+#### `areApproximatelyEqual(pose1: GeoPose, pose2: GeoPose, tolerance?: { position: number; angle: number }): boolean`
 Check if two poses are approximately equal within tolerances.
 
 **Use Case**: Input validation, data cleanup, comparison operations.

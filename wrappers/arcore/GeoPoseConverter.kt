@@ -30,7 +30,7 @@ package org.ogc.geopose.wrappers.arcore
 import kotlin.math.sqrt
 
 /**
- * OGC GeoPose Basic Quaternion representation
+ * OGC GeoPose (Basic Quaternion) representation
  * Position in WGS84 geodetic coordinates, orientation as quaternion in ENU frame
  */
 data class GeoPose(

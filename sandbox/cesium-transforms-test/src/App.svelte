@@ -11,14 +11,14 @@
     Math as CesiumMath
   } from "cesium";
   import type { Cesium3DTileset } from "cesium";
-  import { createEntityFromGeoPose, type GeoPoseBQ } from "./lib/GeoPoseConverter";
+  import { createEntityFromGeoPose, type GeoPose } from "./lib/GeoPoseConverter";
 
   import {
     translateGeoPose,
     interpolatePose,
     getRelativePose,
     yprToQuaternion
-  } from "@geopose/transforms";
+  } from "geopose-lib";
 
   import { landmarks, type Landmark } from "./data/landmarks";
   import { scenarios, type Scenario, type ScenarioOperation } from "./data/scenarios";
@@ -97,11 +97,11 @@
   let googleTilesStatus: "idle" | "loading" | "ready" | "error" = "idle";
   let googleTilesError = "";
 
-  let initialPose: GeoPoseBQ = buildPoseFromLandmark(
+  let initialPose: GeoPose = buildPoseFromLandmark(
     getLandmarkById(selectedLandmarkId) ?? landmarks[0]
   );
   let currentPose = { ...initialPose };
-  let lastTargetPose: GeoPoseBQ | null = null;
+  let lastTargetPose: GeoPose | null = null;
   let testLog: string[] = [];
 
   function log(msg: string) {
@@ -120,7 +120,7 @@
     return modelOptions.find((model) => model.id === id);
   }
 
-  function buildPoseFromLandmark(landmark: Landmark): GeoPoseBQ {
+  function buildPoseFromLandmark(landmark: Landmark): GeoPose {
     return {
       position: { lat: landmark.lat, lon: landmark.lon, h: landmark.h },
       quaternion: { x: 0, y: 0, z: 0, w: 1 }
@@ -160,7 +160,7 @@
     } as any;
   }
 
-  function updateSourceEntity(pose: GeoPoseBQ) {
+  function updateSourceEntity(pose: GeoPose) {
     if (!viewer) return;
     const { position, orientation } = createEntityFromGeoPose(pose);
     const modelGraphics = buildModelGraphics(sourceModelId);
@@ -187,7 +187,7 @@
     currentPose = pose;
   }
 
-  function updateTargetEntity(pose: GeoPoseBQ) {
+  function updateTargetEntity(pose: GeoPose) {
     if (!viewer) return;
     const { position, orientation } = createEntityFromGeoPose(pose);
     const modelGraphics = buildModelGraphics(targetModelId);
@@ -255,9 +255,9 @@
   }
 
   function applyScenarioOperation(
-    pose: GeoPoseBQ,
+    pose: GeoPose,
     op: ScenarioOperation
-  ): GeoPoseBQ {
+  ): GeoPose {
     if (op.type === "translate") {
       return translateGeoPose(pose, {
         east: op.east,
@@ -452,7 +452,7 @@
     if (!googleTilesAvailable) {
       log("Google 3D Tiles key not set. Add VITE_GOOGLE_MAPS_API_KEY in .env.local.");
     }
-    log("Ready. GeoPose Transforms Library loaded.");
+    log("Ready. GeoPose lib loaded.");
   });
 
   onDestroy(() => {
@@ -467,7 +467,7 @@
 
   <div class="controls-panel">
     <h1>Transforms Test Runner</h1>
-    <p class="subtitle">Visual Verification for @geopose/transforms</p>
+    <p class="subtitle">Visual Verification for geopose-lib</p>
 
     <div class="test-controls">
       <button on:click={reset} class="btn-reset">Reset Position</button>

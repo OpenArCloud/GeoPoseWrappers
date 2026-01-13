@@ -91,11 +91,11 @@ import {
   getEntityGeoPose,
   setEntityGeoPose,
   createEntityFromGeoPose,
-  type GeoPoseBQ
+  type GeoPose
 } from './lib/GeoPoseConverter';
 
 // Get current camera pose
-const pose: GeoPoseBQ = getCameraGeoPose(viewer.camera);
+const pose: GeoPose = getCameraGeoPose(viewer.camera);
 // {
 //   position: { lat: 48.8584, lon: 2.2945, h: 1000 },
 //   quaternion: { x: 0, y: 0, z: 0, w: 1 }
@@ -118,10 +118,10 @@ viewer.entities.add({ position, orientation, /* ... */ });
 
 ## GeoPose Format
 
-The demo uses **OGC GeoPose Basic-Quaternion (GeoPoseBQ)** format:
+The demo uses **OGC GeoPose (Basic Quaternion)** format:
 
 ```typescript
-interface GeoPoseBQ {
+interface GeoPose {
   position: {
     lat: number;  // Latitude in degrees (WGS84)
     lon: number;  // Longitude in degrees (WGS84)

@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [svelte(), cesium()],
   resolve: {
     alias: {
-      "@geopose/transforms": path.resolve(__dirname, "../../gepose-transforms/typescript/src/index.ts")
+      "geopose-lib": path.resolve(__dirname, "../../packages/geopose-lib/src/index.ts")
     }
   }
 });

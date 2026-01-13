@@ -1,5 +1,5 @@
-// OGC GeoPose Basic Quaternion
-export interface GeoPoseBQ {
+// OGC GeoPose (Basic Quaternion)
+export interface GeoPose {
     position: {
         lat: number; // Latitude in degrees
         lon: number; // Longitude in degrees

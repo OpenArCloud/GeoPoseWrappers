@@ -1,13 +1,15 @@
-import { GeoPoseBQ, ENU, LLH, Quaternion, WGS84 } from '../types.js';
+import { GeoPose, ENU, LLH, Quaternion, WGS84 } from '../types.js';
 import { geoPoseToECEF, ecefToGeoPose } from './conversions.js';
+
+const DEG_TO_RAD = Math.PI / 180;
 
 /**
  * Express a GeoPose relative to a local ENU tangent plane at a given origin.
  */
-export function geoPoseToLocalENU(geoPose: GeoPoseBQ, origin: LLH): { position: ENU; orientation: Quaternion } {
+export function geoPoseToLocalENU(geoPose: GeoPose, origin: LLH): { position: ENU; orientation: Quaternion } {
     // 1. Convert Target and Origin to ECEF
     const targetEcef = geoPoseToECEF(geoPose);
-    const originPose: GeoPoseBQ = {
+    const originPose: GeoPose = {
         position: origin,
         quaternion: { x: 0, y: 0, z: 0, w: 1 } // orientation doesn't matter for the point conversion
     };
@@ -19,8 +21,8 @@ export function geoPoseToLocalENU(geoPose: GeoPoseBQ, origin: LLH): { position: 
     const dz = targetEcef.position.z - originEcef.position.z;
 
     // 3. Rotate vector into ENU frame of the Origin
-    const latRad = origin.lat * Math.PI / 180;
-    const lonRad = origin.lon * Math.PI / 180;
+    const latRad = origin.lat * DEG_TO_RAD;
+    const lonRad = origin.lon * DEG_TO_RAD;
 
     const cl = Math.cos(latRad);
     const sl = Math.sin(latRad);
@@ -66,17 +68,17 @@ export function geoPoseToLocalENU(geoPose: GeoPoseBQ, origin: LLH): { position: 
 /**
  * Convert local ENU coordinates back to global GeoPose.
  */
-export function localENUToGeoPose(enu: ENU, orientation: Quaternion, origin: LLH): GeoPoseBQ {
+export function localENUToGeoPose(enu: ENU, orientation: Quaternion, origin: LLH): GeoPose {
     // 1. Convert Origin to ECEF
-    const originPose: GeoPoseBQ = {
+    const originPose: GeoPose = {
         position: origin,
         quaternion: { x: 0, y: 0, z: 0, w: 1 }
     };
     const originEcef = geoPoseToECEF(originPose);
 
     // 2. Rotate ENU vector into ECEF
-    const latRad = origin.lat * Math.PI / 180;
-    const lonRad = origin.lon * Math.PI / 180;
+    const latRad = origin.lat * DEG_TO_RAD;
+    const lonRad = origin.lon * DEG_TO_RAD;
 
     const cl = Math.cos(latRad);
     const sl = Math.sin(latRad);
@@ -115,7 +117,7 @@ export function localENUToGeoPose(enu: ENU, orientation: Quaternion, origin: LLH
 /**
  * Move a GeoPose by an ENU offset.
  */
-export function translateGeoPose(geoPose: GeoPoseBQ, translation: ENU): GeoPoseBQ {
+export function translateGeoPose(geoPose: GeoPose, translation: ENU): GeoPose {
     // 1. Convert to Local ENU at its OWN position (Origin = self)
     // 2. Apply translation
     // 3. Convert back

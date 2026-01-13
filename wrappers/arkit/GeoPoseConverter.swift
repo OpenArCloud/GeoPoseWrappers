@@ -32,7 +32,7 @@ import CoreLocation
 
 // MARK: - GeoPose Types
 
-/// OGC GeoPose Basic Quaternion representation
+/// OGC GeoPose (Basic Quaternion) representation
 /// Position in WGS84 geodetic coordinates, orientation as quaternion in ENU frame
 public struct GeoPose: Codable, Equatable {
     public let position: Position
