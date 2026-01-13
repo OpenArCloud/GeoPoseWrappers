@@ -24,6 +24,62 @@
   let viewer: Viewer | null = null;
   let demoEntity: Entity | null = null;
 
+  // Available 3D models - using local GLB assets in public/models folder
+  // These are clearly directional models that help visualize orientation
+  const modelOptions = [
+    {
+      id: "airplane",
+      name: "Airplane",
+      url: "/models/Cesium_Air.glb",
+      scale: 50,
+      description: "Cesium Air aircraft"
+    },
+    {
+      id: "car",
+      name: "Milk Truck",
+      url: "/models/CesiumMilkTruck.glb",
+      scale: 30,
+      description: "Cesium Milk Truck vehicle"
+    },
+    {
+      id: "person",
+      name: "Person",
+      url: "/models/Cesium_Man.glb",
+      scale: 50,
+      description: "Cesium Man character"
+    },
+    {
+      id: "drone",
+      name: "Drone",
+      url: "/models/CesiumDrone.glb",
+      scale: 20,
+      description: "Cesium Drone aircraft"
+    },
+    {
+      id: "balloon",
+      name: "Hot Air Balloon",
+      url: "/models/CesiumBalloon.glb",
+      scale: 15,
+      description: "Cesium Hot Air Balloon"
+    },
+    {
+      id: "vehicle",
+      name: "Ground Vehicle",
+      url: "/models/GroundVehicle.glb",
+      scale: 30,
+      description: "Cesium Ground Vehicle"
+    },
+    {
+      id: "box",
+      name: "Box (Original)",
+      url: "",
+      scale: 1,
+      description: "Simple box primitive"
+    },
+  ];
+
+  let selectedModelId = "airplane";
+
   // Camera GeoPose state
   let cameraGeoPose: GeoPoseBQ = {
     position: { lat: 0, lon: 0, h: 10000000 },
@@ -121,6 +177,11 @@
     flyToInput();
   }
 
+  // Get currently selected model config
+  function getSelectedModel() {
+    return modelOptions.find(m => m.id === selectedModelId) || modelOptions[0];
+  }
+
   // Create/update demo entity
   function updateEntity() {
     if (!viewer) return;
@@ -130,16 +191,22 @@
       quaternion: hprToQuat(entityHeading, entityPitch, entityRoll),
     };
 
-    if (demoEntity) {
-      setEntityGeoPose(demoEntity, geoPose);
-    } else {
-      const { position, orientation } = createEntityFromGeoPose(geoPose);
+    const selectedModel = getSelectedModel();
+    const { position, orientation } = createEntityFromGeoPose(geoPose);
 
+    // Remove existing entity if model type changed
+    if (demoEntity) {
+      viewer.entities.remove(demoEntity);
+      demoEntity = null;
+    }
+
+    // Create entity with selected model or box
+    if (selectedModel.id === "box") {
+      // Use simple box primitive
       demoEntity = viewer.entities.add({
         name: "GeoPose Demo Entity",
         position,
         orientation,
-        model: undefined, // Will use box instead
         box: {
           dimensions: new Cartesian3(100, 100, 100),
           material: Color.BLUE.withAlpha(0.7),
@@ -147,9 +214,27 @@
           outlineColor: Color.WHITE,
         },
       });
+    } else {
+      // Use GLB model
+      demoEntity = viewer.entities.add({
+        name: `GeoPose Demo Entity (${selectedModel.name})`,
+        position,
+        orientation,
+        model: {
+          uri: selectedModel.url,
+          scale: selectedModel.scale,
+          minimumPixelSize: 64,
+          maximumScale: selectedModel.scale * 2,
+        },
+      });
     }
 
     entityGeoPose = geoPose;
+  }
+
+  // Handle model selection change
+  function onModelChange() {
+    updateEntity();
   }
 
   // Read entity's current GeoPose
@@ -321,6 +406,17 @@
       <!-- Entity Controls -->
       <section class="section">
         <h2>Entity GeoPose</h2>
+
+        <!-- Model Selector -->
+        <div class="model-selector">
+          <label for="model-select">3D Model:</label>
+          <select id="model-select" bind:value={selectedModelId} on:change={onModelChange}>
+            {#each modelOptions as model}
+              <option value={model.id}>{model.name}</option>
+            {/each}
+          </select>
+          <span class="model-description">{getSelectedModel().description}</span>
+        </div>
 
         <div class="pose-display">
           <div class="pose-row">
@@ -622,6 +718,51 @@
 
   .info a {
     color: #53d9d9;
+  }
+
+  /* Model Selector */
+  .model-selector {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #0f0f1a;
+    border-radius: 4px;
+  }
+
+  .model-selector label {
+    display: block;
+    font-size: 0.75rem;
+    color: #888;
+    margin-bottom: 6px;
+  }
+
+  .model-selector select {
+    width: 100%;
+    background: #16213e;
+    border: 1px solid #0f3460;
+    color: #eee;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-bottom: 6px;
+  }
+
+  .model-selector select:focus {
+    outline: none;
+    border-color: #e94560;
+  }
+
+  .model-selector select option {
+    background: #16213e;
+    color: #eee;
+    padding: 8px;
+  }
+
+  .model-description {
+    display: block;
+    font-size: 0.75rem;
+    color: #4ecca3;
+    font-style: italic;
   }
 
   /* Hide Cesium credits for cleaner demo */

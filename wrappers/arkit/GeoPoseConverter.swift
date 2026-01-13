@@ -274,3 +274,200 @@ extension ARGeoAnchor {
     }
 }
 #endif
+
+// MARK: - JSON Serialization
+
+extension GeoPose {
+
+    /// Serialize GeoPose to OGC-compliant JSON string
+    /// - Parameter prettyPrinted: If true, format with indentation for readability
+    /// - Returns: JSON string or nil if encoding fails
+    public func toJSON(prettyPrinted: Bool = false) -> String? {
+        guard let data = toJSONData(prettyPrinted: prettyPrinted) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    /// Serialize GeoPose to JSON Data
+    /// - Parameter prettyPrinted: If true, format with indentation for readability
+    /// - Returns: JSON Data or nil if encoding fails
+    public func toJSONData(prettyPrinted: Bool = false) -> Data? {
+        let encoder = JSONEncoder()
+        if prettyPrinted {
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        }
+        return try? encoder.encode(self)
+    }
+
+    /// Serialize array of GeoPoses to JSON string
+    /// - Parameters:
+    ///   - poses: Array of GeoPose objects
+    ///   - prettyPrinted: If true, format with indentation for readability
+    /// - Returns: JSON array string or nil if encoding fails
+    public static func toJSONArray(_ poses: [GeoPose], prettyPrinted: Bool = false) -> String? {
+        let encoder = JSONEncoder()
+        if prettyPrinted {
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        }
+        guard let data = try? encoder.encode(poses) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    /// Deserialize GeoPose from JSON string
+    /// - Parameter jsonString: OGC-compliant GeoPose JSON string
+    /// - Returns: GeoPose or nil if parsing fails
+    public static func fromJSON(_ jsonString: String) -> GeoPose? {
+        guard let data = jsonString.data(using: .utf8) else { return nil }
+        return fromJSONData(data)
+    }
+
+    /// Deserialize GeoPose from JSON Data
+    /// - Parameter data: JSON data
+    /// - Returns: GeoPose or nil if parsing fails
+    public static func fromJSONData(_ data: Data) -> GeoPose? {
+        let decoder = JSONDecoder()
+        return try? decoder.decode(GeoPose.self, from: data)
+    }
+
+    /// Deserialize array of GeoPoses from JSON string
+    /// - Parameter jsonString: JSON array string
+    /// - Returns: Array of GeoPose or nil if parsing fails
+    public static func fromJSONArray(_ jsonString: String) -> [GeoPose]? {
+        guard let data = jsonString.data(using: .utf8) else { return nil }
+        let decoder = JSONDecoder()
+        return try? decoder.decode([GeoPose].self, from: data)
+    }
+
+    /// Validate that the GeoPose has valid coordinates and normalized quaternion
+    public var isValid: Bool {
+        // Check latitude bounds (-90 to 90)
+        guard position.lat >= -90 && position.lat <= 90 else { return false }
+        // Check longitude bounds (-180 to 180)
+        guard position.lon >= -180 && position.lon <= 180 else { return false }
+        // Check quaternion is normalized (magnitude ≈ 1)
+        let mag = sqrt(quaternion.x * quaternion.x + quaternion.y * quaternion.y +
+                      quaternion.z * quaternion.z + quaternion.w * quaternion.w)
+        guard abs(mag - 1.0) < 0.001 else { return false }
+        return true
+    }
+}
+
+// MARK: - GeoPose YPR (Yaw-Pitch-Roll) Support
+
+/// OGC GeoPose Basic YPR representation
+/// Position in WGS84 geodetic coordinates, orientation as yaw/pitch/roll angles in degrees
+public struct GeoPoseYPR: Codable, Equatable {
+    public let position: GeoPose.Position
+    public let angles: Angles
+
+    public init(position: GeoPose.Position, angles: Angles) {
+        self.position = position
+        self.angles = angles
+    }
+
+    public struct Angles: Codable, Equatable {
+        public let yaw: Double    // Rotation around Z (up), degrees, positive = CCW from East
+        public let pitch: Double  // Rotation around Y (north), degrees, positive = nose up
+        public let roll: Double   // Rotation around X (east), degrees, positive = right wing down
+
+        public init(yaw: Double, pitch: Double, roll: Double) {
+            self.yaw = yaw
+            self.pitch = pitch
+            self.roll = roll
+        }
+    }
+
+    /// Convert YPR representation to Quaternion representation
+    /// Uses ZYX rotation order (yaw, then pitch, then roll)
+    public func toQuaternion() -> GeoPose {
+        // Convert degrees to radians
+        let yawRad = angles.yaw * .pi / 180.0
+        let pitchRad = angles.pitch * .pi / 180.0
+        let rollRad = angles.roll * .pi / 180.0
+
+        // Half angles
+        let cy = cos(yawRad / 2)
+        let sy = sin(yawRad / 2)
+        let cp = cos(pitchRad / 2)
+        let sp = sin(pitchRad / 2)
+        let cr = cos(rollRad / 2)
+        let sr = sin(rollRad / 2)
+
+        // ZYX rotation order quaternion
+        let quaternion = GeoPose.Quaternion(
+            x: sr * cp * cy - cr * sp * sy,
+            y: cr * sp * cy + sr * cp * sy,
+            z: cr * cp * sy - sr * sp * cy,
+            w: cr * cp * cy + sr * sp * sy
+        ).normalized
+
+        return GeoPose(position: position, quaternion: quaternion)
+    }
+
+    /// Create YPR representation from Quaternion representation
+    public static func fromQuaternion(_ geoPose: GeoPose) -> GeoPoseYPR {
+        let q = geoPose.quaternion
+
+        // Roll (x-axis rotation)
+        let sinr_cosp = 2.0 * (q.w * q.x + q.y * q.z)
+        let cosr_cosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y)
+        let roll = atan2(sinr_cosp, cosr_cosp)
+
+        // Pitch (y-axis rotation)
+        let sinp = 2.0 * (q.w * q.y - q.z * q.x)
+        let pitch: Double
+        if abs(sinp) >= 1 {
+            pitch = copysign(.pi / 2, sinp) // Clamp to ±90°
+        } else {
+            pitch = asin(sinp)
+        }
+
+        // Yaw (z-axis rotation)
+        let siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
+        let cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+        let yaw = atan2(siny_cosp, cosy_cosp)
+
+        // Convert radians to degrees
+        let angles = Angles(
+            yaw: yaw * 180.0 / .pi,
+            pitch: pitch * 180.0 / .pi,
+            roll: roll * 180.0 / .pi
+        )
+
+        return GeoPoseYPR(position: geoPose.position, angles: angles)
+    }
+
+    // MARK: JSON Serialization
+
+    /// Serialize to OGC-compliant JSON string
+    public func toJSON(prettyPrinted: Bool = false) -> String? {
+        let encoder = JSONEncoder()
+        if prettyPrinted {
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        }
+        guard let data = try? encoder.encode(self) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    /// Deserialize from JSON string
+    public static func fromJSON(_ jsonString: String) -> GeoPoseYPR? {
+        guard let data = jsonString.data(using: .utf8) else { return nil }
+        let decoder = JSONDecoder()
+        return try? decoder.decode(GeoPoseYPR.self, from: data)
+    }
+}
+
+// MARK: - Convenience Extensions
+
+extension GeoPose {
+    /// Convert to YPR representation
+    public func toYPR() -> GeoPoseYPR {
+        GeoPoseYPR.fromQuaternion(self)
+    }
+}
+
+extension GeoPoseYPR {
+    /// Convert to Quaternion representation
+    public func toBQ() -> GeoPose {
+        toQuaternion()
+    }
+}
