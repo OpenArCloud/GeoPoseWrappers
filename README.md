@@ -8,16 +8,17 @@ make it easy to input/output GeoPose and interoperate across systems and platfor
 - `gepose-transforms/`: Language-specific implementations (C, C#, Java, Kotlin, Python, Swift).
 - `wrappers/`: Higher-level wrappers and adapters around GeoPose transforms.
 - `sandbox/cesium-transforms-test`: Cesium-based visual verification demo.
-- `geopose-transforms-proposal.md`: API proposal and rationale.
-- `transform-lib-improvements.md`: Planned improvements and extensions.
-- `wrapper-plan.md`: Wrapper roadmap notes.
-- `logfile_*.md`: Development logs and decisions.
+- `devlog/geopose-transforms-proposal.md`: API proposal and rationale.
+- `devlog/transform-lib-improvements.md`: Planned improvements and extensions.
+- `devlog/wrapper-plan.md`: Wrapper roadmap notes.
+- `devlog/logfile_*.md`: Development logs and decisions.
 
 ## Status
 
 Alpha. This repo and its packages are highly likely to be subject to breaking changes.
 The `geopose-lib` package is published by the Open AR Cloud Association.
 The alpha release is available on npm: https://www.npmjs.com/package/geopose-lib
+This repo is developed with the help of various agentic AI solutions, and caution is advisable until the repo owners declare the resources ready for production.
 
 ## License
 
