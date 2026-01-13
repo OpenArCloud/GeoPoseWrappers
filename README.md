@@ -8,10 +8,7 @@ make it easy to input/output GeoPose and interoperate across systems and platfor
 - `gepose-transforms/`: Language-specific implementations (C, C#, Java, Kotlin, Python, Swift).
 - `wrappers/`: Higher-level wrappers and adapters around GeoPose transforms.
 - `sandbox/cesium-transforms-test`: Cesium-based visual verification demo.
-- `devlog/geopose-transforms-proposal.md`: API proposal and rationale.
-- `devlog/transform-lib-improvements.md`: Planned improvements and extensions.
-- `devlog/wrapper-plan.md`: Wrapper roadmap notes.
-- `devlog/logfile_*.md`: Development logs and decisions.
+- `devlog/`: Proposals, plans, and development logs.
 
 ## Status
 
