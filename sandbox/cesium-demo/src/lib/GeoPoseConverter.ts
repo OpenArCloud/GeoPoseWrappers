@@ -30,28 +30,14 @@ import {
   Entity,
   JulianDate,
 } from "cesium";
+import { quaternionToYPR, yprToQuaternion } from "geopose-lib";
+import type { GeoPose } from "geopose-lib";
 
 // ============================================================================
-// Type Definitions
+// Type Re-exports
 // ============================================================================
 
-/**
- * OGC GeoPose (Basic Quaternion) representation
- * Position in WGS84 geodetic coordinates, orientation as quaternion in ENU frame
- */
-export interface GeoPose {
-  position: {
-    lat: number; // Latitude in degrees (WGS84)
-    lon: number; // Longitude in degrees (WGS84)
-    h: number; // Height in meters above WGS84 ellipsoid
-  };
-  quaternion: {
-    x: number;
-    y: number;
-    z: number;
-    w: number;
-  };
-}
+export type { GeoPose } from "geopose-lib";
 
 // ============================================================================
 // Utility Functions
@@ -86,21 +72,16 @@ function hprToQuaternion(
   pitch: number,
   roll: number
 ): { x: number; y: number; z: number; w: number } {
-  // Half angles
-  const cy = Math.cos(heading / 2);
-  const sy = Math.sin(heading / 2);
-  const cp = Math.cos(pitch / 2);
-  const sp = Math.sin(pitch / 2);
-  const cr = Math.cos(roll / 2);
-  const sr = Math.sin(roll / 2);
-
-  // Combine rotations (ZYX order for heading-pitch-roll)
-  return normalizeQuaternion({
-    x: sr * cp * cy - cr * sp * sy,
-    y: cr * sp * cy + sr * cp * sy,
-    z: cr * cp * sy - sr * sp * cy,
-    w: cr * cp * cy + sr * sp * sy,
+  const pose = yprToQuaternion({
+    position: { lat: 0, lon: 0, h: 0 },
+    angles: {
+      yaw: CesiumMath.toDegrees(heading),
+      pitch: CesiumMath.toDegrees(pitch),
+      roll: CesiumMath.toDegrees(roll),
+    },
   });
+
+  return pose.quaternion;
 }
 
 /**
@@ -112,28 +93,16 @@ function quaternionToHpr(q: {
   z: number;
   w: number;
 }): { heading: number; pitch: number; roll: number } {
-  const { x, y, z, w } = q;
+  const ypr = quaternionToYPR({
+    position: { lat: 0, lon: 0, h: 0 },
+    quaternion: q,
+  });
 
-  // Roll (x-axis rotation)
-  const sinr_cosp = 2 * (w * x + y * z);
-  const cosr_cosp = 1 - 2 * (x * x + y * y);
-  const roll = Math.atan2(sinr_cosp, cosr_cosp);
-
-  // Pitch (y-axis rotation)
-  const sinp = 2 * (w * y - z * x);
-  let pitch: number;
-  if (Math.abs(sinp) >= 1) {
-    pitch = (Math.sign(sinp) * Math.PI) / 2;
-  } else {
-    pitch = Math.asin(sinp);
-  }
-
-  // Yaw/Heading (z-axis rotation)
-  const siny_cosp = 2 * (w * z + x * y);
-  const cosy_cosp = 1 - 2 * (y * y + z * z);
-  const heading = Math.atan2(siny_cosp, cosy_cosp);
-
-  return { heading, pitch, roll };
+  return {
+    heading: CesiumMath.toRadians(ypr.angles.yaw),
+    pitch: CesiumMath.toRadians(ypr.angles.pitch),
+    roll: CesiumMath.toRadians(ypr.angles.roll),
+  };
 }
 
 /**

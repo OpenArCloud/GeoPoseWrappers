@@ -19,6 +19,7 @@
     "vite-plugin-cesium": "^1.2.22"
   },
   "dependencies": {
-    "cesium": "^1.113.0"
+    "cesium": "^1.113.0",
+    "geopose-lib": "^0.0.1"
   }
 }
