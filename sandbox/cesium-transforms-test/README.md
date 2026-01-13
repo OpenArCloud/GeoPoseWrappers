@@ -110,7 +110,7 @@ import {
   setEntityGeoPose,
   createEntityFromGeoPose,
   type GeoPose
-} from './lib/GeoPoseConverter';
+} from "cesium-geopose";
 
 // Get current camera pose
 const pose: GeoPose = getCameraGeoPose(viewer.camera);

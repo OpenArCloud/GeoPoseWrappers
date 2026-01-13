@@ -18,7 +18,7 @@
     setEntityGeoPose,
     createEntityFromGeoPose,
     type GeoPose,
-  } from "./lib/GeoPoseConverter";
+  } from "cesium-geopose";
 
   let cesiumContainer: HTMLDivElement;
   let viewer: Viewer | null = null;

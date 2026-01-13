@@ -11,7 +11,7 @@
     Math as CesiumMath
   } from "cesium";
   import type { Cesium3DTileset } from "cesium";
-  import { createEntityFromGeoPose, type GeoPose } from "./lib/GeoPoseConverter";
+  import { createEntityFromGeoPose, type GeoPose } from "cesium-geopose";
 
   import {
     translateGeoPose,
