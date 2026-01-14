@@ -111,3 +111,21 @@ export interface LLH {
     /** Height in meters above the WGS84 ellipsoid. */
     h: number;
 }
+
+/**
+ * 6DOF pose in a projected coordinate reference system (e.g., UTM).
+ * Position is in meters (easting, northing, height).
+ * Orientation quaternion follows the same convention as GeoPose (ENU-aligned).
+ */
+export interface ProjectedPose {
+    /** Easting in meters (X axis in projected CRS). */
+    x: number;
+    /** Northing in meters (Y axis in projected CRS). */
+    y: number;
+    /** Height in meters above the ellipsoid (Z axis). */
+    z: number;
+    /** Orientation quaternion (ENU-aligned). */
+    quaternion: Quaternion;
+    /** EPSG code identifying the coordinate reference system, e.g., "EPSG:32632". */
+    epsg: string;
+}

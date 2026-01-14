@@ -4,7 +4,8 @@ import {
     ENU,
     LLH,
     ECEF,
-    Quaternion
+    Quaternion,
+    ProjectedPose
 } from './types.js';
 import {
     yprToQuaternion,
@@ -22,6 +23,11 @@ import {
     applyRelativePose,
     interpolatePose
 } from './core/advanced.js';
+import {
+    geoPoseToProjected,
+    projectedToGeoPose,
+    getUTMZoneEPSG
+} from './core/projected.js';
 
 /**
  * Relative pose expressed as ENU translation and quaternion rotation.
@@ -117,6 +123,17 @@ export class GeoPoseBasic {
      */
     static fromLocalENU(enu: ENU, orientation: Quaternion, origin: LLH): GeoPoseBasic {
         return new GeoPoseBasic(localENUToGeoPose(enu, orientation, origin));
+    }
+
+    /**
+     * Create from a projected 6DOF pose (e.g., UTM coordinates).
+     * The EPSG code is read from the pose itself.
+     *
+     * @param pose - ProjectedPose with x, y, z, quaternion, and epsg.
+     * @returns GeoPoseBasic in WGS84.
+     */
+    static fromProjected(pose: ProjectedPose): GeoPoseBasic {
+        return new GeoPoseBasic(projectedToGeoPose(pose));
     }
 
     /**
@@ -521,6 +538,36 @@ export class GeoPoseBasic {
      */
     toLocalENU(origin: LLH): { position: ENU; orientation: Quaternion } {
         return geoPoseToLocalENU(this.toGeoPose(), origin);
+    }
+
+    /**
+     * Convert the current pose to a projected 6DOF pose (e.g., UTM).
+     *
+     * @param epsg - Target EPSG code, e.g., "EPSG:32632" for UTM zone 32N.
+     * @returns ProjectedPose with x, y, z, quaternion, and epsg.
+     */
+    toProjected(epsg: string): ProjectedPose {
+        return geoPoseToProjected(this.toGeoPose(), epsg);
+    }
+
+    /**
+     * Convert the current pose to a projected pose using the appropriate UTM zone.
+     * The UTM zone is automatically determined from the position's longitude and latitude.
+     *
+     * @returns ProjectedPose in the appropriate UTM zone.
+     */
+    toProjectedUTM(): ProjectedPose {
+        const epsg = this.getUTMZone();
+        return this.toProjected(epsg);
+    }
+
+    /**
+     * Get the UTM zone EPSG code for this pose's position.
+     *
+     * @returns EPSG code for the appropriate UTM zone, e.g., "EPSG:32632".
+     */
+    getUTMZone(): string {
+        return getUTMZoneEPSG(this._position.lon, this._position.lat >= 0);
     }
 
     /**
