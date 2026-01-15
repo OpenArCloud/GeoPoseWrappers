@@ -6,6 +6,8 @@
     Color,
     Entity,
     HeadingPitchRoll,
+    HeadingPitchRange,
+    BoundingSphere,
     Transforms,
     Math as CesiumMath,
     PolylineGlowMaterialProperty,
@@ -92,13 +94,19 @@
   let assetRoll = 0;
 
   // ============================================
+  // STATE: AR Session Frame Yaw (rotation from North)
+  // ============================================
+  // How the session's Z-forward axis is rotated from true North
+  // This is typically determined when the AR session starts
+  let sessionFrameYaw = 15; // degrees from North (0 = Z points North)
+
+  // ============================================
   // COMPUTED: AR Session Origin GeoPose
   // ============================================
   // Derived from device camera GeoPose and device local pose
   let sessionOriginLat = 0;
   let sessionOriginLon = 0;
   let sessionOriginHeight = 0;
-  let sessionOriginYaw = 0;
 
   // ============================================
   // COMPUTED: Asset position in AR Session Frame
@@ -115,18 +123,21 @@
       deviceCamera: { lat: 48.8584, lon: 2.2945, h: 1.7, yaw: 45, pitch: -15, roll: 5 },
       deviceLocal: { x: 2, y: 0, z: -3, yaw: 30, pitch: -15, roll: 5 },
       asset: { lat: 48.8586, lon: 2.2948, h: 0, yaw: 0 },
+      sessionYaw: 15,
     },
     {
       name: "Museum Interior",
       deviceCamera: { lat: 48.8606, lon: 2.3376, h: 1.6, yaw: 120, pitch: -10, roll: 0 },
       deviceLocal: { x: 5, y: 0, z: -2, yaw: 90, pitch: -10, roll: 0 },
       asset: { lat: 48.8606, lon: 2.3377, h: 1.0, yaw: 180 },
+      sessionYaw: -45,
     },
     {
       name: "Looking Up",
       deviceCamera: { lat: 48.8566, lon: 2.3522, h: 1.5, yaw: 0, pitch: 30, roll: 0 },
       deviceLocal: { x: 0, y: 0, z: -1, yaw: 0, pitch: 30, roll: 0 },
       asset: { lat: 48.8566, lon: 2.3523, h: 5, yaw: 0 },
+      sessionYaw: 60,
     },
   ];
 
@@ -192,22 +203,13 @@
     const assetPose = getAssetGeoPose();
 
     // Step 1: Compute AR Session Origin GeoPose
-    // The session origin is where the device would be if deviceLocal was (0,0,0)
-    // We need to "subtract" the device's local position from its global position
-
-    // The device local pose tells us where the device is in session frame
-    // Session frame has Y=up (or we use Z=up), ground-aligned
-    // Session origin yaw = device camera yaw - device local yaw
-    sessionOriginYaw = deviceCameraYaw - deviceLocalYaw;
-
-    // Normalize
-    while (sessionOriginYaw > 180) sessionOriginYaw -= 360;
-    while (sessionOriginYaw < -180) sessionOriginYaw += 360;
+    // The session frame yaw defines how the session's Z axis is rotated from North
+    // Session origin is computed by "subtracting" device local pose from device global pose
 
     // Convert device local position to ENU offset from session origin
-    // Device local: X=right, Y=up, Z=back (or forward depending on convention)
-    // We'll use: X=right, Y=forward, Z=up (ENU-like but rotated by session yaw)
-    const sessionYawRad = sessionOriginYaw * Math.PI / 180;
+    // Session frame: X=right, Y=up, Z=forward
+    // We rotate by sessionFrameYaw to convert session coords to ENU
+    const sessionYawRad = sessionFrameYaw * Math.PI / 180;
     const cosYaw = Math.cos(sessionYawRad);
     const sinYaw = Math.sin(sessionYawRad);
 
@@ -224,7 +226,7 @@
     const negativeOffset = { east: -deviceEastOffset, north: -deviceNorthOffset, up: -deviceUpOffset };
     const sessionOriginPose = localENUToGeoPose(
       negativeOffset,
-      yprToQuat(sessionOriginYaw, 0, 0),
+      yprToQuat(sessionFrameYaw, 0, 0),
       deviceCameraPose.position
     );
 
@@ -236,14 +238,14 @@
     // Get asset position relative to session origin in ENU
     const assetInENU = geoPoseToLocalENU(assetPose, sessionOriginPose.position);
 
-    // Rotate from ENU to session frame (which is rotated by sessionOriginYaw)
+    // Rotate from ENU to session frame (which is rotated by sessionFrameYaw)
     assetInSessionX = assetInENU.position.east * cosYaw + assetInENU.position.north * sinYaw;
     assetInSessionZ = -assetInENU.position.east * sinYaw + assetInENU.position.north * cosYaw;
     assetInSessionY = assetInENU.position.up;
 
     // Asset orientation in session frame
     const assetENUYPR = quatToYPR(assetInENU.orientation);
-    assetInSessionYaw = assetENUYPR.yaw - sessionOriginYaw;
+    assetInSessionYaw = assetENUYPR.yaw - sessionFrameYaw;
     while (assetInSessionYaw > 180) assetInSessionYaw -= 360;
     while (assetInSessionYaw < -180) assetInSessionYaw += 360;
   }
@@ -307,7 +309,7 @@
     // Session Origin
     const sessionOriginPose: GeoPose = {
       position: { lat: sessionOriginLat, lon: sessionOriginLon, h: sessionOriginHeight },
-      quaternion: yprToQuat(sessionOriginYaw, 0, 0),
+      quaternion: yprToQuat(sessionFrameYaw, 0, 0),
     };
     const sessionPos = createEntityFromGeoPose(sessionOriginPose);
     cesiumEntities.push(viewer.entities.add({
@@ -327,7 +329,7 @@
     }));
 
     // Add coordinate axes at session origin
-    addCesiumAxes(sessionOriginLat, sessionOriginLon, sessionOriginHeight, sessionOriginYaw);
+    addCesiumAxes(sessionOriginLat, sessionOriginLon, sessionOriginHeight, sessionFrameYaw);
 
     // Line from session origin to device
     const sessionCartesian = Cartesian3.fromDegrees(sessionOriginLon, sessionOriginLat, sessionOriginHeight);
@@ -442,7 +444,12 @@
     sessionViewContainer.appendChild(sessionRenderer.domElement);
 
     sessionControls = new OrbitControls(sessionCamera, sessionRenderer.domElement);
-    sessionControls.enableDamping = true;
+    sessionControls.enableDamping = false;
+    sessionControls.autoRotate = false;
+    sessionControls.enableZoom = true;
+    sessionControls.enablePan = true;
+    sessionControls.target.set(0, 0, 0);
+    sessionControls.update();
 
     // Lighting
     sessionScene.add(new THREE.AmbientLight(0x404040, 2));
@@ -453,9 +460,25 @@
     // Ground grid
     sessionScene.add(new THREE.GridHelper(20, 20, 0x444466, 0x333355));
 
-    // Session frame axes at origin
+    // ENU reference axes (faded) - showing true East-North-Up
+    // In this view: X=East, Z=North (forward), Y=Up
+    const enuAxes = createAxesGroup(4, { x: 0x663333, y: 0x333366, z: 0x336633 });
+    sessionScene.add(enuAxes);
+
+    // Add ENU labels
+    addAxisLabel(sessionScene, "E", new THREE.Vector3(4.5, 0, 0), 0x663333);
+    addAxisLabel(sessionScene, "U", new THREE.Vector3(0, 4.5, 0), 0x333366);
+    addAxisLabel(sessionScene, "N", new THREE.Vector3(0, 0, 4.5), 0x336633);
+
+    // Session frame axes at origin (bright)
+    // AR Session: X=right, Y=up, Z=forward (rotated from ENU by session yaw)
     sessionFrameAxes = createAxesGroup(3, { x: 0xff4444, y: 0x4444ff, z: 0x44ff44 });
     sessionScene.add(sessionFrameAxes);
+
+    // Add AR session axis labels
+    addAxisLabel(sessionScene, "X", new THREE.Vector3(3.5, 0, 0), 0xff4444);
+    addAxisLabel(sessionScene, "Y", new THREE.Vector3(0, 3.5, 0), 0x4444ff);
+    addAxisLabel(sessionScene, "Z", new THREE.Vector3(0, 0, 3.5), 0x44ff44);
 
     // Origin marker
     const originGeom = new THREE.SphereGeometry(0.15);
@@ -515,6 +538,25 @@
     // Asset mesh
     cameraAssetMesh = createAssetMesh();
     cameraScene.add(cameraAssetMesh);
+  }
+
+  function addAxisLabel(scene: THREE.Scene, text: string, position: THREE.Vector3, color: number) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d')!;
+    ctx.fillStyle = '#' + color.toString(16).padStart(6, '0');
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 32, 32);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMat = new THREE.SpriteMaterial({ map: texture });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.position.copy(position);
+    sprite.scale.set(0.8, 0.8, 1);
+    scene.add(sprite);
   }
 
   function createAxesGroup(size: number, colors: { x: number; y: number; z: number }): THREE.Group {
@@ -622,28 +664,55 @@
   function updateThreeJS() {
     if (!sessionScene || !cameraScene) return;
 
-    // Update Session View
-    // Device position in session frame (X=right, Y=up, Z=forward)
-    sessionDeviceMesh.position.set(deviceLocalX, deviceLocalY, deviceLocalZ);
+    const sessionYawRad = sessionFrameYaw * Math.PI / 180;
+    const cosYaw = Math.cos(sessionYawRad);
+    const sinYaw = Math.sin(sessionYawRad);
+
+    // This view is ENU-centric with DEVICE CAMERA at origin (fixed reference point)
+    // Three.js: X=East, Y=Up, Z=North
+
+    const deviceCameraPose = getDeviceCameraGeoPose();
+    const assetPose = getAssetGeoPose();
+
+    // Asset position in ENU relative to DEVICE CAMERA (this is fixed!)
+    const assetInENU = geoPoseToLocalENU(assetPose, deviceCameraPose.position);
+
+    // Place asset in ENU coordinates - this stays fixed when session yaw changes
+    sessionAssetMesh.position.set(
+      assetInENU.position.east,
+      assetInENU.position.up,
+      assetInENU.position.north
+    );
+    const assetENUYPR = quatToYPR(assetInENU.orientation);
+    sessionAssetMesh.rotation.y = -assetENUYPR.yaw * Math.PI / 180;
+
+    // Device (camera) is at origin in this view
+    sessionDeviceMesh.position.set(0, 0, 0);
     sessionDeviceMesh.rotation.set(
-      deviceLocalPitch * Math.PI / 180,
-      -deviceLocalYaw * Math.PI / 180,
-      deviceLocalRoll * Math.PI / 180
+      deviceCameraPitch * Math.PI / 180,
+      -deviceCameraYaw * Math.PI / 180,
+      deviceCameraRoll * Math.PI / 180
     );
 
-    // Asset position in session frame
-    sessionAssetMesh.position.set(assetInSessionX, assetInSessionY, assetInSessionZ);
-    sessionAssetMesh.rotation.y = -assetInSessionYaw * Math.PI / 180;
+    // Session origin position: device is at (deviceLocalX, deviceLocalY, deviceLocalZ) in session frame
+    // So session origin is at -deviceLocal converted to ENU
+    const sessionOriginEast = -(deviceLocalX * cosYaw - deviceLocalZ * sinYaw);
+    const sessionOriginNorth = -(deviceLocalX * sinYaw + deviceLocalZ * cosYaw);
+    const sessionOriginUp = -deviceLocalY;
 
-    // Update Camera View
-    // Camera is at device local position, looking in device direction
+    // Move session frame axes to session origin and rotate them
+    sessionFrameAxes.position.set(sessionOriginEast, sessionOriginUp, sessionOriginNorth);
+    sessionFrameAxes.rotation.y = -sessionYawRad;
+
+    // Move origin marker to session origin
+    sessionOriginMarker.position.set(sessionOriginEast, sessionOriginUp, sessionOriginNorth);
+
+    // Update Camera View (this view IS in session frame coordinates)
     cameraViewCamera.position.set(deviceLocalX, deviceLocalY + 0.1, deviceLocalZ);
 
-    // Apply device orientation
     const yawRad = -deviceLocalYaw * Math.PI / 180;
     const pitchRad = deviceLocalPitch * Math.PI / 180;
 
-    // Look direction based on device orientation
     const lookDist = 10;
     const lookX = deviceLocalX + Math.sin(yawRad) * Math.cos(pitchRad) * lookDist;
     const lookY = deviceLocalY + Math.sin(pitchRad) * lookDist;
@@ -651,7 +720,7 @@
     cameraViewCamera.lookAt(lookX, lookY, lookZ);
     cameraViewCamera.rotation.z = deviceLocalRoll * Math.PI / 180;
 
-    // Asset in camera view
+    // Asset in camera view (session frame coordinates)
     cameraAssetMesh.position.set(assetInSessionX, assetInSessionY, assetInSessionZ);
     cameraAssetMesh.rotation.y = -assetInSessionYaw * Math.PI / 180;
   }
@@ -707,16 +776,26 @@
     assetLon = preset.asset.lon;
     assetHeight = preset.asset.h;
     assetYaw = preset.asset.yaw;
+    sessionFrameYaw = preset.sessionYaw;
     updateAll();
   }
 
   function flyToScene() {
     if (!viewer) return;
-    const viewPose: GeoPose = {
-      position: { lat: sessionOriginLat - 0.0002, lon: sessionOriginLon - 0.0002, h: sessionOriginHeight + 30 },
-      quaternion: yprToQuat(45, -35, 0),
-    };
-    flyCameraToGeoPose(viewer.camera, viewPose, 2);
+
+    // Use setView for instant positioning (no animation)
+    viewer.camera.setView({
+      destination: Cartesian3.fromDegrees(
+        sessionOriginLon - 0.0003,
+        sessionOriginLat - 0.0003,
+        sessionOriginHeight + 60
+      ),
+      orientation: {
+        heading: CesiumMath.toRadians(45),
+        pitch: CesiumMath.toRadians(-45),
+        roll: 0
+      }
+    });
   }
 
   onMount(async () => {
@@ -725,11 +804,16 @@
       timeline: false,
       baseLayerPicker: true,
       geocoder: false,
-      homeButton: true,
+      homeButton: false,
       sceneModePicker: true,
       navigationHelpButton: false,
       fullscreenButton: false,
     });
+
+    // Disable camera inertia/momentum to prevent drift
+    viewer.scene.screenSpaceCameraController.inertiaSpin = 0;
+    viewer.scene.screenSpaceCameraController.inertiaTranslate = 0;
+    viewer.scene.screenSpaceCameraController.inertiaZoom = 0;
 
     initSessionView();
     initCameraView();
@@ -774,7 +858,7 @@
       <div class="view-panel half">
         <div class="view-header">
           <span class="view-title">AR Session Frame</span>
-          <span class="view-subtitle">X=right, Y=up, Z=forward</span>
+          <span class="view-subtitle">Faded=ENU (E,N,U) | Bright=Session (X,Y,Z)</span>
         </div>
         <div bind:this={sessionViewContainer} class="view-content"></div>
       </div>
@@ -832,19 +916,29 @@
       </section>
 
       <section class="section highlight">
+        <h2>AR Session Frame Orientation</h2>
+        <p class="info-text">How session Z-forward is rotated from true North</p>
+        <div class="slider-group">
+          <label>Yaw from North:</label>
+          <input type="range" min="-180" max="180" bind:value={sessionFrameYaw} on:input={updateAll} />
+          <span class="slider-value">{sessionFrameYaw}°</span>
+        </div>
+      </section>
+
+      <section class="section">
         <h2>Device Local Pose (in AR Session)</h2>
-        <p class="info-text">Where the device is within the AR session's ground-aligned frame</p>
+        <p class="info-text">Position in session frame: X=right, Y=up, Z=forward</p>
         <div class="input-grid">
           <div class="input-group">
-            <label>X (m)</label>
+            <label>X right (m)</label>
             <input type="number" bind:value={deviceLocalX} step="0.5" on:change={updateAll} />
           </div>
           <div class="input-group">
-            <label>Y (m)</label>
+            <label>Y up (m)</label>
             <input type="number" bind:value={deviceLocalY} step="0.5" on:change={updateAll} />
           </div>
           <div class="input-group">
-            <label>Z (m)</label>
+            <label>Z fwd (m)</label>
             <input type="number" bind:value={deviceLocalZ} step="0.5" on:change={updateAll} />
           </div>
           <div class="input-group">
@@ -890,17 +984,17 @@
           <div class="result-item"><span class="result-label">Lat</span><span class="result-value">{fmt(sessionOriginLat, 6)}°</span></div>
           <div class="result-item"><span class="result-label">Lon</span><span class="result-value">{fmt(sessionOriginLon, 6)}°</span></div>
           <div class="result-item"><span class="result-label">Height</span><span class="result-value">{fmt(sessionOriginHeight, 2)}m</span></div>
-          <div class="result-item"><span class="result-label">Yaw</span><span class="result-value">{fmt(sessionOriginYaw, 1)}°</span></div>
+          <div class="result-item"><span class="result-label">Yaw</span><span class="result-value">{fmt(sessionFrameYaw, 1)}°</span></div>
         </div>
       </section>
 
       <section class="section result">
         <h2>Computed: Asset in AR Session</h2>
-        <p class="info-text">Position for AR rendering</p>
+        <p class="info-text">Position for AR rendering (X=right, Y=up, Z=forward)</p>
         <div class="result-grid">
-          <div class="result-item"><span class="result-label">X</span><span class="result-value">{fmt(assetInSessionX)} m</span></div>
-          <div class="result-item"><span class="result-label">Y</span><span class="result-value">{fmt(assetInSessionY)} m</span></div>
-          <div class="result-item"><span class="result-label">Z</span><span class="result-value">{fmt(assetInSessionZ)} m</span></div>
+          <div class="result-item"><span class="result-label">X right</span><span class="result-value">{fmt(assetInSessionX)} m</span></div>
+          <div class="result-item"><span class="result-label">Y up</span><span class="result-value">{fmt(assetInSessionY)} m</span></div>
+          <div class="result-item"><span class="result-label">Z fwd</span><span class="result-value">{fmt(assetInSessionZ)} m</span></div>
           <div class="result-item"><span class="result-label">Yaw</span><span class="result-value">{fmt(assetInSessionYaw, 1)}°</span></div>
         </div>
       </section>
@@ -1077,6 +1171,31 @@
     font-size: 0.65rem;
     color: #aaa;
     margin: 0 0 8px 0;
+  }
+
+  .slider-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .slider-group label {
+    font-size: 0.7rem;
+    color: #888;
+    white-space: nowrap;
+  }
+
+  .slider-group input[type="range"] {
+    flex: 1;
+    accent-color: #e94560;
+  }
+
+  .slider-value {
+    min-width: 45px;
+    text-align: right;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #4ecca3;
   }
 
   .result-grid {
