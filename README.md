@@ -3,7 +3,7 @@ This is a monorepo for GeoPose-related libraries, wrappers, demos, and plans pub
 
 The goal of this project is to make it easier for developers to input/output OGC GeoPose between any systems and platforms that handles real world position and orientation. In short enable greater interoperability between such systems by making it easier to implement support for the encoding standard, and handle it correctly within each implementing system.
 
-Open Geospatial Consortium GeoPose Standards Working Group is responsible for development and maintenance of a standard for geographically-anchored pose (GeoPose) with 6 degrees of freedom referenced to one or more standardized Coordinate Reference Systems (CRSs). In June 2022, the OGC Technical Committee approved the OGC GeoPose 1.0 Data Exchange Standard as an OGC Specification. 
+Open Geospatial Consortium GeoPose Standards Working Group is responsible for development and maintenance of a standard for geographically-anchored pose (GeoPose) with 6 degrees of freedom referenced to one or more standardized Coordinate Reference Systems (CRSs). In June 2022, the OGC Technical Committee approved the [OGC GeoPose 1.0 Data Exchange Standard](https://docs.ogc.org/is/21-056r11/21-056r11.html) as an OGC Specification. 
 
 ## Repo layout
 
