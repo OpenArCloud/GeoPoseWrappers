@@ -1,9 +1,9 @@
 # GeoPoseWrappers
-This is a monorepo for GeoPose-related libraries, wrappers, demos, and plans published and maintained by the Open AR Cloud Association as open source under  MIT licence. 
+This is a dedicated repository for GeoPose-related libraries, wrappers, demos, and plans published and maintained by the [Open AR Cloud Association](https://www.openarcloud.org/) as open source under MIT licence. 
 
-The goal of this project is to make it easier for developers to input/output OGC GeoPose between any systems and platforms that handles real world position and orientation. In short enable greater interoperability between such systems by making it easier to implement support for the encoding standard, and handle it correctly within each implementing system.
+The goal of these projects is to make it easier for developers to input/output OGC GeoPose-compliant data from or to any systems and platforms that handle real world position and orientation. In short, where it is implemented, use of assets in this repository enables greater interoperability between systems that use or transform geospatial coordinates in 6DOF, by making it easier to implement support for the GeoPose data exchange standard, and handle it correctly within each implementing system.
 
-Open Geospatial Consortium GeoPose Standards Working Group is responsible for development and maintenance of a standard for geographically-anchored pose (GeoPose) with 6 degrees of freedom referenced to one or more standardized Coordinate Reference Systems (CRSs). In June 2022, the OGC Technical Committee approved the [OGC GeoPose 1.0 Data Exchange Standard](https://docs.ogc.org/is/21-056r11/21-056r11.html) as an OGC Specification. 
+Open Geospatial Consortium GeoPose Standards Working Group is responsible for the development and maintenance of GeoPose, a standard for geographically-anchored pose with 6 degrees of freedom referenced to one or more standardized Coordinate Reference Systems (CRSs). In June 2022, the OGC Technical Committee approved the [OGC GeoPose 1.0 Data Exchange Standard](https://docs.ogc.org/is/21-056r11/21-056r11.html) as an OGC Specification. 
 
 ## Repo layout
 
