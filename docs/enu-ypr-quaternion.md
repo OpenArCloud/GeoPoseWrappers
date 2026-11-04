@@ -5,6 +5,7 @@ Positive yaw turns **East toward North**, counterclockwise when viewed from
 with three SVG illustrations, two reproducible pose sequences, and equivalent
 GeoPose Basic YPR and Basic Quaternion examples.
 
+- [How a quaternion stores an angle](#before-the-examples-how-a-quaternion-stores-an-angle)
 - [Sequence A: zero rotation to +90° yaw](#sequence-a-zero-rotation-to-90-yaw)
 - [Sequence B: yaw, then pitch, then roll](#sequence-b-yaw-then-pitch-then-roll)
 - [Conversion mathematics](#conversion-mathematics)
@@ -53,6 +54,62 @@ latitude **60°**, longitude **10°**, height **100 m above the ellipsoid**.
 Only orientation changes. These are **local ENU quaternions**, not ECEF
 quaternions. An ECEF pose needs the position-dependent ECEF-to-ENU rotation
 before using the examples or formulas below.
+
+## Before the examples: how a quaternion stores an angle
+
+A rotation has a **physical angle** $\alpha$ and a **unit axis**
+$\hat{\mathbf{a}}=(a_x,a_y,a_z)$ pointing along its positive rotation axis.
+Its unit quaternion, written in xyzw order, is:
+
+$
+(x,y,z,w)=
+\left(
+a_x\sin(\alpha/2),\;
+a_y\sin(\alpha/2),\;
+a_z\sin(\alpha/2),\;
+\cos(\alpha/2)
+\right).
+$
+
+The axis determines the direction of the quaternion's vector part $(x,y,z)$.
+The sine and cosine use **half the physical rotation angle**. This is how
+quaternions encode a rotation; it does not halve the object's rotation.
+
+For pure yaw, the axis is +Up, so $\hat{\mathbf{a}}=(0,0,1)$ and
+$\alpha=\psi$ (yaw). The formula simplifies to:
+
+$
+(x,y,z,w)=\left(0,0,\sin(\psi/2),\cos(\psi/2)\right).
+$
+
+| Physical yaw $\psi$ | Half-angle $\psi/2$ used in the quaternion | $z$ | $w$ |
+| --- | --- | --- | --- |
+| 0° | 0° | $\sin(0^\circ)=0$ | $\cos(0^\circ)=1$ |
+| +90° | +45° | $\sin(45^\circ)=1/\sqrt{2}$ | $\cos(45^\circ)=1/\sqrt{2}$ |
+
+**The second row describes a 90° turn, not a 45° turn.** One way to see why
+the half-angle works is to apply this yaw quaternion to the object's +x axis.
+Its resulting ENU coordinates are:
+
+$
+(1-2z^2,\;2wz,\;0)
+=
+\left(
+1-2\sin^2(\psi/2),\;
+2\sin(\psi/2)\cos(\psi/2),\;
+0
+\right)
+=
+(\cos\psi,\;\sin\psi,\;0).
+$
+
+The double-angle identities recover the full physical yaw $\psi$.
+At +90° this vector is $(0,1,0)$: North.
+
+Angles are shown in degrees here for readability. JavaScript's sine and
+cosine functions take radians: +90° is $\pi/2$, and its half-angle is $\pi/4$.
+The [conversion mathematics](#conversion-mathematics) section extends this
+single-axis rule to combined yaw, pitch and roll.
 
 ## Sequence A: zero rotation to +90° yaw
 
@@ -143,7 +200,9 @@ It leaves all three axes unchanged.
 }
 ```
 
-For this pure yaw, `z = sin(45°)` and `w = cos(45°)`. Both are positive.
+For this **+90° yaw**, the half-angle rule above gives
+`z = sin(90° / 2) = sin(45°)` and `w = cos(90° / 2) = cos(45°)`.
+Both components are positive; the object rotates the full **90°**.
 The physical check is:
 
 $$
