@@ -1,0 +1,1 @@
+{"name":"OpenArCloud.GeoPose.Tests","references":["OpenArCloud.GeoPose.Core","OpenArCloud.GeoPose.Services","OpenArCloud.GeoPose.Unity"],"includePlatforms":["Editor"],"optionalUnityReferences":["TestAssemblies"]}

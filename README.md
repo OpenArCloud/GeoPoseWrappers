@@ -9,6 +9,10 @@ Open Geospatial Consortium GeoPose Standards Working Group is responsible for th
 
 Read the [illustrated ENU, yaw–pitch–roll and quaternion guide](docs/enu-ypr-quaternion.md) for positive-yaw SVG illustrations, a step-by-step intrinsic rotation sequence, paired GeoPose JSON examples, conversion mathematics, and runnable npm examples.
 
+## Unity and augmented reality
+
+The [Unity GeoPose wrapper](wrappers/unity/README.md) provides double-precision WGS84/ECEF conversions, a shared local ENU origin, explicit Unity camera/model axis mappings, geographic anchors and origin rebasing. Its [OSCP AR demo](wrappers/unity/Samples~/OscpAr/README.md) supports MultiSet and configurable VPS endpoints, a ground-level origin from the first localization, nearby bundled GLBs, and optional OSCP content discovery.
+
 ## Repo layout
 
 - `packages/`

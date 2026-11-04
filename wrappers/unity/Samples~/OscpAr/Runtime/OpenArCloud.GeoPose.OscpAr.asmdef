@@ -1,0 +1,1 @@
+{"name":"OpenArCloud.GeoPose.OscpAr","references":["OpenArCloud.GeoPose.Core","OpenArCloud.GeoPose.Services","OpenArCloud.GeoPose.Unity","Unity.XR.ARFoundation","Unity.XR.ARSubsystems","Unity.XR.CoreUtils","Unity.InputSystem","Unity.Collections","glTFast"]}

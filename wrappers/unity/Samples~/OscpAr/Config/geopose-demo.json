@@ -1,0 +1,26 @@
+{
+  "selectedEndpoint": "multiset",
+  "endpoints": [
+    {
+      "id": "multiset",
+      "url": "https://api.multiset.ai/v1/vps/map/geopose",
+      "bearerTokenEnvironment": "MULTISET_ACCESS_TOKEN",
+      "cameraAxes": "RightUpBack",
+      "mapCode": "REPLACE_WITH_YOUR_GEOREFERENCED_MAP_CODE",
+      "mapSetCode": ""
+    }
+  ],
+  "includeLocationHint": false,
+  "imageLongEdge": 1280,
+  "discovery": {
+    "enabled": false,
+    "url": "https://YOUR-CDS-HOST",
+    "topic": "YOUR-TOPIC",
+    "bearerTokenEnvironment": "OSCP_CDS_ACCESS_TOKEN",
+    "h3Indexes": [],
+    "assetBaseUrl": "https://YOUR-ASSET-HOST/",
+    "bodyAxes": "ForwardLeftUp",
+    "maxAssets": 12,
+    "maxDistanceMetres": 100
+  }
+}
