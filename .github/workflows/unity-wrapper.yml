@@ -1,0 +1,19 @@
+name: Unity GeoPose core
+on:
+  pull_request:
+    paths: ['wrappers/unity/**', 'docs/examples/enu-rotation-poses.json', '.github/workflows/unity-wrapper.yml']
+  push:
+    branches: [main]
+    paths: ['wrappers/unity/**', 'docs/examples/enu-rotation-poses.json', '.github/workflows/unity-wrapper.yml']
+permissions:
+  contents: read
+jobs:
+  math-and-protocol:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet run --project wrappers/unity/Tests~/Core/CoreTests.csproj --configuration Release
+      - run: python3 wrappers/unity/Tools~/generate-assets.py --check

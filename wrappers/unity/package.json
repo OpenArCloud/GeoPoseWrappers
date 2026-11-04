@@ -1,0 +1,10 @@
+{
+  "name": "org.openarcloud.geopose",
+  "version": "0.1.0",
+  "displayName": "Open AR Cloud GeoPose",
+  "description": "Double precision WGS84/ECEF/ENU GeoPose conversions, Unity scene anchors and an optional OSCP AR sample.",
+  "unity": "2022.3",
+  "license": "MIT",
+  "dependencies": { "com.unity.nuget.newtonsoft-json": "3.2.2" },
+  "samples": [{ "displayName": "OSCP AR localization and GLB content", "description": "Requires Unity 6, AR Foundation 6 and glTFast 6. See the sample README before import.", "path": "Samples~/OscpAr" }]
+}

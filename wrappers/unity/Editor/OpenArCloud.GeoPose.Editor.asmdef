@@ -1,0 +1,1 @@
+{"name":"OpenArCloud.GeoPose.Editor","references":["OpenArCloud.GeoPose.Core","OpenArCloud.GeoPose.Unity"],"includePlatforms":["Editor"]}
