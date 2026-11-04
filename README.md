@@ -9,8 +9,6 @@ Open Geospatial Consortium GeoPose Standards Working Group is responsible for th
 
 Read the [illustrated ENU, yaw–pitch–roll and quaternion guide](docs/enu-ypr-quaternion.md) for positive-yaw SVG illustrations, a step-by-step intrinsic rotation sequence, paired GeoPose JSON examples, conversion mathematics, and runnable npm examples.
 
-See the [rotation audit, migration notes and verification commands](docs/rotation-consistency.md) for wrapper and demo conventions.
-
 ## Repo layout
 
 - `packages/`
