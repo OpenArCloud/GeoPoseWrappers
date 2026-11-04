@@ -47,6 +47,10 @@ const backToYpr = basic.toGeoPoseYPR();
 console.log(backToYpr.angles.yaw);
 ```
 
+## Rotation convention
+
+See the [illustrated ENU / YPR / quaternion guide](../../docs/enu-ypr-quaternion.md) for axis directions, paired JSON poses and runnable conversion examples.
+
 ## Notes
 
 - Yaw/pitch/roll are in degrees for the YPR helpers.

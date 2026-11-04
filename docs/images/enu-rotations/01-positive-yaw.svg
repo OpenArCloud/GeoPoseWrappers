@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="568" viewBox="0 0 1000 568" role="img" aria-labelledby="title desc">
+<title id="title">Positive right-handed yaw in an ENU tangent plane</title>
+<desc id="desc">Two top views: at zero yaw, x points East and y points North. At positive 90-degree yaw, x points North and y points West. z stays Up toward the viewer. The curved arrow runs counterclockwise from East to North.</desc>
+<defs>
+<marker id="142c40" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#142c40"/>
+</marker>
+<marker id="b5c4ce" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#b5c4ce"/>
+</marker>
+<marker id="c73542" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#c73542"/>
+</marker>
+<marker id="1265c0" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#1265c0"/>
+</marker>
+<marker id="16845a" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#16845a"/>
+</marker>
+<marker id="7844b8" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#7844b8"/>
+</marker>
+</defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g font-family="DejaVu Sans, Arial, sans-serif" stroke-linecap="round" stroke-linejoin="round">
+<text x="36.00" y="46.00" font-size="30" fill="#142c40" font-weight="700" text-anchor="start">Positive yaw: East toward North</text>
+<text x="36.00" y="78.00" font-size="18" fill="#506779" font-weight="400" text-anchor="start">Top view from +Up, looking down at the tangent plane</text>
+<rect x="28" y="108" width="464" height="366" rx="18" fill="#f7fafc" stroke="#dce5eb"/>
+<text x="52.00" y="145.00" font-size="23" fill="#142c40" font-weight="700" text-anchor="start">A0 · No rotation</text>
+<line x1="96.000" y1="198.000" x2="396.000" y2="198.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="126.000" y1="183.000" x2="126.000" y2="388.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="96.000" y1="258.000" x2="396.000" y2="258.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="186.000" y1="183.000" x2="186.000" y2="388.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="96.000" y1="318.000" x2="396.000" y2="318.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="246.000" y1="183.000" x2="246.000" y2="388.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="96.000" y1="378.000" x2="396.000" y2="378.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="306.000" y1="183.000" x2="306.000" y2="388.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="366.000" y1="183.000" x2="366.000" y2="388.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="96.000" y1="318.000" x2="412.000" y2="318.000" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<line x1="246.000" y1="388.000" x2="246.000" y2="175.000" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="421.00" y="324.00" font-size="17" fill="#506779" font-weight="600" text-anchor="start">E</text>
+<text x="240.00" y="165.00" font-size="17" fill="#506779" font-weight="600" text-anchor="start">N</text>
+<line x1="246.000" y1="318.000" x2="364.000" y2="318.000" stroke="#c73542" stroke-width="4" marker-end="url(#c73542)"/>
+<line x1="246.000" y1="318.000" x2="246.000" y2="200.000" stroke="#1265c0" stroke-width="4" marker-end="url(#1265c0)"/>
+<text x="362.00" y="343.00" font-size="22" fill="#c73542" font-weight="700" text-anchor="start">x</text>
+<text x="259.00" y="212.00" font-size="22" fill="#1265c0" font-weight="700" text-anchor="start">y</text>
+<circle cx="246" cy="318" r="10" fill="white" stroke="#16845a" stroke-width="2"/>
+<circle cx="246" cy="318" r="3" fill="#16845a"/>
+<text x="52.00" y="424.00" font-size="17" fill="#142c40" font-weight="400" text-anchor="start">Object x = East; object y = North</text>
+<text x="52.00" y="452.00" font-size="16" fill="#16845a" font-weight="400" text-anchor="start">⊙ z = Up, out of the page</text>
+<rect x="518" y="108" width="464" height="366" rx="18" fill="#f7fafc" stroke="#dce5eb"/>
+<text x="542.00" y="145.00" font-size="23" fill="#142c40" font-weight="700" text-anchor="start">A1 · Yaw +90°</text>
+<line x1="586.000" y1="198.000" x2="886.000" y2="198.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="616.000" y1="183.000" x2="616.000" y2="388.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="586.000" y1="258.000" x2="886.000" y2="258.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="676.000" y1="183.000" x2="676.000" y2="388.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="586.000" y1="318.000" x2="886.000" y2="318.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="736.000" y1="183.000" x2="736.000" y2="388.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="586.000" y1="378.000" x2="886.000" y2="378.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="796.000" y1="183.000" x2="796.000" y2="388.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="856.000" y1="183.000" x2="856.000" y2="388.000" stroke="#e0e8ed" stroke-width="1"/>
+<line x1="586.000" y1="318.000" x2="902.000" y2="318.000" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<line x1="736.000" y1="388.000" x2="736.000" y2="175.000" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="911.00" y="324.00" font-size="17" fill="#506779" font-weight="600" text-anchor="start">E</text>
+<text x="730.00" y="165.00" font-size="17" fill="#506779" font-weight="600" text-anchor="start">N</text>
+<line x1="736.000" y1="318.000" x2="736.000" y2="200.000" stroke="#c73542" stroke-width="4" marker-end="url(#c73542)"/>
+<line x1="736.000" y1="318.000" x2="618.000" y2="318.000" stroke="#1265c0" stroke-width="4" marker-end="url(#1265c0)"/>
+<text x="749.00" y="212.00" font-size="22" fill="#c73542" font-weight="700" text-anchor="start">x</text>
+<text x="604.00" y="343.00" font-size="22" fill="#1265c0" font-weight="700" text-anchor="start">y</text>
+<path d="M 801,318 A 65,65 0 0 0 736,253" fill="none" stroke="#7844b8" stroke-width="3" marker-end="url(#7844b8)"/>
+<text x="795.00" y="243.00" font-size="18" fill="#7844b8" font-weight="700" text-anchor="start">+90°</text>
+<circle cx="736" cy="318" r="10" fill="white" stroke="#16845a" stroke-width="2"/>
+<circle cx="736" cy="318" r="3" fill="#16845a"/>
+<text x="542.00" y="424.00" font-size="17" fill="#142c40" font-weight="400" text-anchor="start">Object x = North; object y = West</text>
+<text x="542.00" y="452.00" font-size="16" fill="#16845a" font-weight="400" text-anchor="start">⊙ z = Up, out of the page</text>
+<text x="36.00" y="513.00" font-size="18" fill="#142c40" font-weight="600" text-anchor="start">Right-hand rule: thumb points Up; curled fingers show positive yaw.</text>
+<text x="36.00" y="543.00" font-size="17" fill="#506779" font-weight="400" text-anchor="start">Gray dashed axes stay fixed. Colored axes belong to the rotating object.</text>
+</g>
+</svg>

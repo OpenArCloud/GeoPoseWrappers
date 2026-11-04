@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1090" viewBox="0 0 1000 1090" role="img" aria-labelledby="title desc">
+<title id="title">Intrinsic yaw, pitch and roll sequence in ENU</title>
+<desc id="desc">Four exact projected frames: identity; yaw 90 degrees; yaw 90 and pitch 45 degrees; yaw 90, pitch 45 and roll 90 degrees. Pitch is about the rotated y axis pointing West. Roll is about the rotated x axis pointing North and down. The fixed ENU tangent plane remains visible in every panel.</desc>
+<defs>
+<marker id="142c40" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#142c40"/>
+</marker>
+<marker id="b5c4ce" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#b5c4ce"/>
+</marker>
+<marker id="c73542" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#c73542"/>
+</marker>
+<marker id="1265c0" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#1265c0"/>
+</marker>
+<marker id="16845a" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#16845a"/>
+</marker>
+<marker id="7844b8" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#7844b8"/>
+</marker>
+</defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g font-family="DejaVu Sans, Arial, sans-serif" stroke-linecap="round" stroke-linejoin="round">
+<text x="36.00" y="46.00" font-size="30" fill="#142c40" font-weight="700" text-anchor="start">Three rotations, three moving axes</text>
+<text x="36.00" y="78.00" font-size="18" fill="#506779" font-weight="400" text-anchor="start">Intrinsic Z → Y → X · values below are (yaw, pitch, roll), in degrees</text>
+<rect x="28" y="108" width="464" height="426" rx="18" fill="#f7fafc" stroke="#dce5eb"/>
+<text x="50.00" y="143.00" font-size="21" fill="#142c40" font-weight="700" text-anchor="start">B0 · Start</text>
+<text x="50.00" y="172.00" font-size="17" fill="#7844b8" font-weight="600" text-anchor="start">(0, 0, 0)°</text>
+<polygon points="295.86,185.40 447.29,354.12 220.14,466.60 68.71,297.88" fill="#eaf1f5"/>
+<line x1="299.464" y1="189.415" x2="72.314" y2="301.897" stroke="#d2dde5" stroke-width="1"/>
+<line x1="290.450" y1="188.076" x2="441.883" y2="356.799" stroke="#d2dde5" stroke-width="1"/>
+<line x1="335.519" y1="229.587" x2="108.370" y2="342.069" stroke="#d2dde5" stroke-width="1"/>
+<line x1="236.367" y1="214.857" x2="387.800" y2="383.580" stroke="#d2dde5" stroke-width="1"/>
+<line x1="371.575" y1="269.759" x2="144.425" y2="382.241" stroke="#d2dde5" stroke-width="1"/>
+<line x1="182.283" y1="241.639" x2="333.717" y2="410.361" stroke="#d2dde5" stroke-width="1"/>
+<line x1="407.630" y1="309.931" x2="180.481" y2="422.413" stroke="#d2dde5" stroke-width="1"/>
+<line x1="128.200" y1="268.420" x2="279.633" y2="437.143" stroke="#d2dde5" stroke-width="1"/>
+<line x1="443.686" y1="350.103" x2="216.536" y2="462.585" stroke="#d2dde5" stroke-width="1"/>
+<line x1="74.117" y1="295.201" x2="225.550" y2="463.924" stroke="#d2dde5" stroke-width="1"/>
+<line x1="258.000" y1="326.000" x2="366.167" y2="446.516" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="376.17" y="452.52" font-size="16" fill="#506779" font-weight="600" text-anchor="start">E</text>
+<line x1="258.000" y1="326.000" x2="95.750" y2="406.344" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="75.75" y="412.34" font-size="16" fill="#506779" font-weight="600" text-anchor="start">N</text>
+<line x1="258.000" y1="326.000" x2="258.000" y2="195.441" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="265.00" y="192.44" font-size="16" fill="#506779" font-weight="600" text-anchor="start">U</text>
+<line x1="258.000" y1="326.000" x2="333.994" y2="410.670" stroke="#c73542" stroke-width="4" marker-end="url(#c73542)"/>
+<text x="343.99" y="428.67" font-size="21" fill="#c73542" font-weight="700" text-anchor="start">x</text>
+<line x1="258.000" y1="326.000" x2="144.009" y2="382.447" stroke="#1265c0" stroke-width="4" marker-end="url(#1265c0)"/>
+<text x="130.01" y="400.45" font-size="21" fill="#1265c0" font-weight="700" text-anchor="start">y</text>
+<line x1="258.000" y1="326.000" x2="258.000" y2="234.274" stroke="#16845a" stroke-width="4" marker-end="url(#16845a)"/>
+<text x="268.00" y="227.27" font-size="21" fill="#16845a" font-weight="700" text-anchor="start">z</text>
+<circle cx="258" cy="326" r="4" fill="#142c40"/>
+<text x="50.00" y="483.00" font-size="17" fill="#142c40" font-weight="600" text-anchor="start">ENU and object axes align.</text>
+<text x="50.00" y="511.00" font-size="16" fill="#506779" font-weight="400" text-anchor="start">x = East; y = North; z = Up</text>
+<rect x="518" y="108" width="464" height="426" rx="18" fill="#f7fafc" stroke="#dce5eb"/>
+<text x="540.00" y="143.00" font-size="21" fill="#142c40" font-weight="700" text-anchor="start">B1 · +90° about z</text>
+<text x="540.00" y="172.00" font-size="17" fill="#7844b8" font-weight="600" text-anchor="start">(90, 0, 0)°</text>
+<polygon points="785.86,185.40 937.29,354.12 710.14,466.60 558.71,297.88" fill="#eaf1f5"/>
+<line x1="789.464" y1="189.415" x2="562.314" y2="301.897" stroke="#d2dde5" stroke-width="1"/>
+<line x1="780.450" y1="188.076" x2="931.883" y2="356.799" stroke="#d2dde5" stroke-width="1"/>
+<line x1="825.519" y1="229.587" x2="598.370" y2="342.069" stroke="#d2dde5" stroke-width="1"/>
+<line x1="726.367" y1="214.857" x2="877.800" y2="383.580" stroke="#d2dde5" stroke-width="1"/>
+<line x1="861.575" y1="269.759" x2="634.425" y2="382.241" stroke="#d2dde5" stroke-width="1"/>
+<line x1="672.283" y1="241.639" x2="823.717" y2="410.361" stroke="#d2dde5" stroke-width="1"/>
+<line x1="897.630" y1="309.931" x2="670.481" y2="422.413" stroke="#d2dde5" stroke-width="1"/>
+<line x1="618.200" y1="268.420" x2="769.633" y2="437.143" stroke="#d2dde5" stroke-width="1"/>
+<line x1="933.686" y1="350.103" x2="706.536" y2="462.585" stroke="#d2dde5" stroke-width="1"/>
+<line x1="564.117" y1="295.201" x2="715.550" y2="463.924" stroke="#d2dde5" stroke-width="1"/>
+<line x1="748.000" y1="326.000" x2="856.167" y2="446.516" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="866.17" y="452.52" font-size="16" fill="#506779" font-weight="600" text-anchor="start">E</text>
+<line x1="748.000" y1="326.000" x2="585.750" y2="406.344" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="565.75" y="412.34" font-size="16" fill="#506779" font-weight="600" text-anchor="start">N</text>
+<line x1="748.000" y1="326.000" x2="748.000" y2="195.441" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="755.00" y="192.44" font-size="16" fill="#506779" font-weight="600" text-anchor="start">U</text>
+<line x1="748.000" y1="326.000" x2="634.009" y2="382.447" stroke="#c73542" stroke-width="4" marker-end="url(#c73542)"/>
+<text x="620.01" y="400.45" font-size="21" fill="#c73542" font-weight="700" text-anchor="start">x</text>
+<line x1="748.000" y1="326.000" x2="672.006" y2="241.330" stroke="#1265c0" stroke-width="4" marker-end="url(#1265c0)"/>
+<text x="658.01" y="234.33" font-size="21" fill="#1265c0" font-weight="700" text-anchor="start">y</text>
+<line x1="748.000" y1="326.000" x2="748.000" y2="234.274" stroke="#16845a" stroke-width="4" marker-end="url(#16845a)"/>
+<text x="758.00" y="227.27" font-size="21" fill="#16845a" font-weight="700" text-anchor="start">z</text>
+<circle cx="748" cy="326" r="4" fill="#142c40"/>
+<text x="540.00" y="483.00" font-size="17" fill="#142c40" font-weight="600" text-anchor="start">Yaw axis is Up.</text>
+<text x="540.00" y="511.00" font-size="16" fill="#506779" font-weight="400" text-anchor="start">x = North; y = West; z = Up</text>
+<rect x="28" y="556" width="464" height="426" rx="18" fill="#f7fafc" stroke="#dce5eb"/>
+<text x="50.00" y="591.00" font-size="21" fill="#142c40" font-weight="700" text-anchor="start">B2 · +45° about rotated y</text>
+<text x="50.00" y="620.00" font-size="17" fill="#7844b8" font-weight="600" text-anchor="start">(90, 45, 0)°</text>
+<polygon points="295.86,633.40 447.29,802.12 220.14,914.60 68.71,745.88" fill="#eaf1f5"/>
+<line x1="299.464" y1="637.415" x2="72.314" y2="749.897" stroke="#d2dde5" stroke-width="1"/>
+<line x1="290.450" y1="636.076" x2="441.883" y2="804.799" stroke="#d2dde5" stroke-width="1"/>
+<line x1="335.519" y1="677.587" x2="108.370" y2="790.069" stroke="#d2dde5" stroke-width="1"/>
+<line x1="236.367" y1="662.857" x2="387.800" y2="831.580" stroke="#d2dde5" stroke-width="1"/>
+<line x1="371.575" y1="717.759" x2="144.425" y2="830.241" stroke="#d2dde5" stroke-width="1"/>
+<line x1="182.283" y1="689.639" x2="333.717" y2="858.361" stroke="#d2dde5" stroke-width="1"/>
+<line x1="407.630" y1="757.931" x2="180.481" y2="870.413" stroke="#d2dde5" stroke-width="1"/>
+<line x1="128.200" y1="716.420" x2="279.633" y2="885.143" stroke="#d2dde5" stroke-width="1"/>
+<line x1="443.686" y1="798.103" x2="216.536" y2="910.585" stroke="#d2dde5" stroke-width="1"/>
+<line x1="74.117" y1="743.201" x2="225.550" y2="911.924" stroke="#d2dde5" stroke-width="1"/>
+<line x1="258.000" y1="774.000" x2="366.167" y2="894.516" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="376.17" y="900.52" font-size="16" fill="#506779" font-weight="600" text-anchor="start">E</text>
+<line x1="258.000" y1="774.000" x2="95.750" y2="854.344" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="75.75" y="860.34" font-size="16" fill="#506779" font-weight="600" text-anchor="start">N</text>
+<line x1="258.000" y1="774.000" x2="258.000" y2="643.441" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="265.00" y="640.44" font-size="16" fill="#506779" font-weight="600" text-anchor="start">U</text>
+<line x1="258.000" y1="774.000" x2="177.396" y2="878.774" stroke="#c73542" stroke-width="4" marker-end="url(#c73542)"/>
+<text x="163.40" y="896.77" font-size="21" fill="#c73542" font-weight="700" text-anchor="start">x</text>
+<line x1="258.000" y1="774.000" x2="182.006" y2="689.330" stroke="#1265c0" stroke-width="4" marker-end="url(#1265c0)"/>
+<text x="168.01" y="682.33" font-size="21" fill="#1265c0" font-weight="700" text-anchor="start">y</text>
+<line x1="258.000" y1="774.000" x2="177.396" y2="749.054" stroke="#16845a" stroke-width="4" marker-end="url(#16845a)"/>
+<text x="163.40" y="742.05" font-size="21" fill="#16845a" font-weight="700" text-anchor="start">z</text>
+<circle cx="258" cy="774" r="4" fill="#142c40"/>
+<text x="50.00" y="931.00" font-size="17" fill="#142c40" font-weight="600" text-anchor="start">Pitch axis now points West.</text>
+<text x="50.00" y="959.00" font-size="16" fill="#506779" font-weight="400" text-anchor="start">x tips down; z tips toward North</text>
+<rect x="518" y="556" width="464" height="426" rx="18" fill="#f7fafc" stroke="#dce5eb"/>
+<text x="540.00" y="591.00" font-size="21" fill="#142c40" font-weight="700" text-anchor="start">B3 · +90° about rotated x</text>
+<text x="540.00" y="620.00" font-size="17" fill="#7844b8" font-weight="600" text-anchor="start">(90, 45, 90)°</text>
+<polygon points="785.86,633.40 937.29,802.12 710.14,914.60 558.71,745.88" fill="#eaf1f5"/>
+<line x1="789.464" y1="637.415" x2="562.314" y2="749.897" stroke="#d2dde5" stroke-width="1"/>
+<line x1="780.450" y1="636.076" x2="931.883" y2="804.799" stroke="#d2dde5" stroke-width="1"/>
+<line x1="825.519" y1="677.587" x2="598.370" y2="790.069" stroke="#d2dde5" stroke-width="1"/>
+<line x1="726.367" y1="662.857" x2="877.800" y2="831.580" stroke="#d2dde5" stroke-width="1"/>
+<line x1="861.575" y1="717.759" x2="634.425" y2="830.241" stroke="#d2dde5" stroke-width="1"/>
+<line x1="672.283" y1="689.639" x2="823.717" y2="858.361" stroke="#d2dde5" stroke-width="1"/>
+<line x1="897.630" y1="757.931" x2="670.481" y2="870.413" stroke="#d2dde5" stroke-width="1"/>
+<line x1="618.200" y1="716.420" x2="769.633" y2="885.143" stroke="#d2dde5" stroke-width="1"/>
+<line x1="933.686" y1="798.103" x2="706.536" y2="910.585" stroke="#d2dde5" stroke-width="1"/>
+<line x1="564.117" y1="743.201" x2="715.550" y2="911.924" stroke="#d2dde5" stroke-width="1"/>
+<line x1="748.000" y1="774.000" x2="856.167" y2="894.516" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="866.17" y="900.52" font-size="16" fill="#506779" font-weight="600" text-anchor="start">E</text>
+<line x1="748.000" y1="774.000" x2="585.750" y2="854.344" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="565.75" y="860.34" font-size="16" fill="#506779" font-weight="600" text-anchor="start">N</text>
+<line x1="748.000" y1="774.000" x2="748.000" y2="643.441" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="755.00" y="640.44" font-size="16" fill="#506779" font-weight="600" text-anchor="start">U</text>
+<line x1="748.000" y1="774.000" x2="667.396" y2="878.774" stroke="#c73542" stroke-width="4" marker-end="url(#c73542)"/>
+<text x="653.40" y="896.77" font-size="21" fill="#c73542" font-weight="700" text-anchor="start">x</text>
+<line x1="748.000" y1="774.000" x2="667.396" y2="749.054" stroke="#1265c0" stroke-width="4" marker-end="url(#1265c0)"/>
+<text x="653.40" y="742.05" font-size="21" fill="#1265c0" font-weight="700" text-anchor="start">y</text>
+<line x1="748.000" y1="774.000" x2="823.994" y2="858.670" stroke="#16845a" stroke-width="4" marker-end="url(#16845a)"/>
+<text x="833.99" y="876.67" font-size="21" fill="#16845a" font-weight="700" text-anchor="start">z</text>
+<circle cx="748" cy="774" r="4" fill="#142c40"/>
+<text x="540.00" y="931.00" font-size="17" fill="#142c40" font-weight="600" text-anchor="start">Roll axis points North and down.</text>
+<text x="540.00" y="959.00" font-size="16" fill="#506779" font-weight="400" text-anchor="start">x stays fixed; y rises; z = East</text>
+<text x="36.00" y="1035.00" font-size="17" fill="#506779" font-weight="400" text-anchor="start">Fixed frame: E / N / U (gray). Rotating object: x (red), y (blue), z (green).</text>
+<text x="36.00" y="1065.00" font-size="18" fill="#142c40" font-weight="600" text-anchor="start">Each new rotation uses the object axis after all preceding steps.</text>
+</g>
+</svg>
