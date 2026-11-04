@@ -55,6 +55,9 @@ merely having Y up does not establish North. `createGeoAnchor` is position-only
 because the ARGeoAnchor initializer does not accept arbitrary orientation;
 preserve/apply the supplied rotation separately to content. This change does
 not claim new support for arbitrary unaligned AR sessions.
+The iOS `ARGeoAnchor` conversion now returns an optional GeoPose: when ARKit
+has no altitude yet, it returns `nil` instead of inventing a height. The
+explicit `GeoAnchorData` conversion still returns a GeoPose directly.
 
 **Heading aliases:** `GeoPoseBasic.heading`, `headingDegrees`, `headingRad`,
 and the standalone legacy `hprToQuaternion`/`quaternionToHpr` helpers keep

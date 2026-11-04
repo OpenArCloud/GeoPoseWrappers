@@ -254,11 +254,12 @@ extension GeoPoseConverter {
     /// Converts an ARGeoAnchor to OGC GeoPose (Basic Quaternion)
     ///
     /// - Parameter geoAnchor: ARKit's ARGeoAnchor
-    /// - Returns: GeoPose with ENU orientation
-    public static func toGeoPose(from geoAnchor: ARGeoAnchor) -> GeoPose {
+    /// - Returns: GeoPose with ENU orientation, or nil while altitude is unavailable.
+    public static func toGeoPose(from geoAnchor: ARGeoAnchor) -> GeoPose? {
+        guard let altitude = geoAnchor.altitude else { return nil }
         let data = GeoAnchorData(
             coordinate: geoAnchor.coordinate,
-            altitude: geoAnchor.altitude,
+            altitude: altitude,
             altitudeSource: GeoAnchorData.AltitudeSource(rawValue: geoAnchor.altitudeSource.rawValue) ?? .unknown,
             transform: geoAnchor.transform
         )
@@ -284,8 +285,8 @@ extension GeoPoseConverter {
 
 @available(iOS 14.0, *)
 extension ARGeoAnchor {
-    /// Convert to GeoPose
-    public func toGeoPose() -> GeoPose {
+    /// Convert to GeoPose, or nil while the anchor has no altitude.
+    public func toGeoPose() -> GeoPose? {
         GeoPoseConverter.toGeoPose(from: self)
     }
 }

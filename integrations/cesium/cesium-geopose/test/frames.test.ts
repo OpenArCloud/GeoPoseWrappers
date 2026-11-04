@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
-import { Camera, Cartesian3, GeographicProjection, Matrix4, Transforms, Entity, SceneMode } from 'cesium';
+import { Camera, Cartesian3, GeographicProjection, Matrix3, Matrix4, Transforms, Entity, SceneMode } from 'cesium';
 import { yprToQuaternion } from 'geopose-lib';
 import * as adapter from '../src/adapter.js';
 import * as wrapper from '../../../../wrappers/cesium/GeoPoseConverter.js';
@@ -46,7 +46,17 @@ for (const [name, api] of [['npm adapter',adapter], ['standalone wrapper',wrappe
           expect(options.duration).toBe(3);
           vector(enuVector((options.orientation as any).direction,p),sample.axesInENU.z.map((n:number)=>-n));
           vector(enuVector((options.orientation as any).up,p),sample.axesInENU.y);
-          const entity=new Entity(api.createEntityFromGeoPose(pose));
+          const props=api.createEntityFromGeoPose(pose);
+          const matrix=Matrix3.fromQuaternion(props.orientation);
+          for (const [column,axis] of ['x','y','z'].entries()) {
+            vector(enuVector(Matrix3.getColumn(matrix,column,new Cartesian3()),p),sample.axesInENU[axis]);
+          }
+          const entity=new Entity();
+          api.setEntityGeoPose(entity,pose);
+          const entityMatrix=Matrix3.fromQuaternion(entity.orientation!.getValue()!);
+          for (const [column,axis] of ['x','y','z'].entries()) {
+            vector(enuVector(Matrix3.getColumn(entityMatrix,column,new Cartesian3()),p),sample.axesInENU[axis]);
+          }
           const result=api.getEntityGeoPose(entity)!.quaternion;
           expect(Math.abs(result.x*q.x+result.y*q.y+result.z*q.z+result.w*q.w)).toBeCloseTo(1,10);
         });
