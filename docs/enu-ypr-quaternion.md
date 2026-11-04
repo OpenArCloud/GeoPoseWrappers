@@ -1,7 +1,6 @@
-# GeoPose rotations in East–North–Up: yaw, pitch, roll and quaternions
+# Understanding GeoPose rotations relative to East–North–Up: yaw, pitch, roll and quaternions
 
-Positive yaw turns **East toward North**, counterclockwise when viewed from
-**+Up looking down at the origin**. This guide makes that convention concrete
+GeoPose rotation are **right-handed**. Positive yaw turns **East toward North**, counterclockwise when viewed from **+Up looking down at the origin**. This guide makes that convention concrete
 with three SVG illustrations, two reproducible pose sequences, and equivalent
 GeoPose Basic YPR and Basic Quaternion examples.
 
