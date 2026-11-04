@@ -177,7 +177,9 @@ public enum GeoPoseConverter {
         )
 
         // Extract quaternion from transform matrix
-        let eusQuat = simd_quatd(simd_quatf(geoAnchorData.transform))
+        let rotation = simd_quatf(geoAnchorData.transform)
+        let eusQuat = simd_quatd(ix: Double(rotation.imag.x), iy: Double(rotation.imag.y),
+                                 iz: Double(rotation.imag.z), r: Double(rotation.real))
 
         // Transform from EUS to ENU frame
         let enuQuat = simd_mul(qEusToEnu, eusQuat)
@@ -206,7 +208,9 @@ public enum GeoPoseConverter {
 
         // Build transform matrix from quaternion
         // The rotation part comes from the quaternion
-        let rotationMatrix = simd_float3x3(simd_quatf(normalizedQuat))
+        let floatQuat = simd_quatf(ix: Float(normalizedQuat.imag.x), iy: Float(normalizedQuat.imag.y),
+                                   iz: Float(normalizedQuat.imag.z), r: Float(normalizedQuat.real))
+        let rotationMatrix = simd_float3x3(floatQuat)
 
         // Create full 4x4 transform (rotation only, no translation in local space)
         var transform = simd_float4x4(1.0) // Identity
@@ -241,7 +245,7 @@ extension GeoPose {
 
 // MARK: - ARKit Integration (when ARKit is available)
 
-#if canImport(ARKit)
+#if canImport(ARKit) && os(iOS) && !targetEnvironment(macCatalyst)
 import ARKit
 
 @available(iOS 14.0, *)

@@ -24,6 +24,7 @@ remain historical; they are not current API contracts.
 | Relative orientation | Ignored base orientation; identity reset a rotated base | `relative = inverse(base) * target`; apply as `base * relative`, transporting tangent frames via ECEF |
 | Small-angle interpolation | Used the midpoint regardless of `t` | Normalized interpolation with the requested `t`, including endpoints |
 | AR demo | Used a reflected East/Up/North frame, yaw sign flips, and discarded pitch/roll | Right-handed East/Up/South scene, full quaternion composition, common transforms for all views |
+| Native wrapper compilation | Kotlin imports were below declarations; Swift used unsupported float/double quaternion initializers and exposed iOS-only types on macOS | Imports moved, components converted explicitly, iOS APIs platform-gated; executable wrapper tests added |
 | Duplicate demos | Independent adapter/component copies could drift | Compatibility entries delegate to maintained implementations |
 | Projected positions | Comments implied grid axes always align with ENU | Orientation remains true local ENU; no grid-convergence correction is implied |
 

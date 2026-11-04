@@ -35,3 +35,4 @@ jobs:
       - run: |
           swiftc wrappers/arkit/GeoPoseConverter.swift wrappers/arkit/test/RotationTest.swift -o "$RUNNER_TEMP/geopose-swift-test"
           "$RUNNER_TEMP/geopose-swift-test" docs/examples/enu-rotation-poses.json
+          xcrun --sdk iphoneos swiftc -typecheck -target arm64-apple-ios14.0 -sdk "$(xcrun --sdk iphoneos --show-sdk-path)" wrappers/arkit/GeoPoseConverter.swift
