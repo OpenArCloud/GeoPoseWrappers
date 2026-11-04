@@ -469,9 +469,9 @@ $\sqrt{x^2+y^2+z^2+w^2}$. For this convention:
 
 $$
 \begin{aligned}
-\phi &= \operatorname{atan2}\!\left(2(wx+yz),\,1-2(x^2+y^2)\right),\\
-\theta &= \arcsin\!\left(\operatorname{clamp}\!\left(2(wy-zx),-1,1\right)\right),\\
-\psi &= \operatorname{atan2}\!\left(2(wz+xy),\,1-2(y^2+z^2)\right).
+\phi &= \mathrm{atan2}\!\left(2(wx+yz),\,1-2(x^2+y^2)\right),\\
+\theta &= \arcsin\!\left(\mathrm{clamp}\!\left(2(wy-zx),-1,1\right)\right),\\
+\psi &= \mathrm{atan2}\!\left(2(wz+xy),\,1-2(y^2+z^2)\right).
 \end{aligned}
 $$
 
