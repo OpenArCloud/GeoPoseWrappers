@@ -10,12 +10,30 @@ using Newtonsoft.Json.Linq;
 
 namespace OpenArCloud.GeoPose
 {
+    public enum CameraAxes { RightUpBack, RightDownForward, ForwardLeftUp }
+    public static class CameraConventions
+    {
+        // Normalize an endpoint's declared camera body to the wrapper's right/up/back camera body.
+        public static BasicPose ToRightUpBack(BasicPose pose,CameraAxes axes)
+        {
+            Quaterniond correction;
+            switch(axes)
+            {
+                case CameraAxes.RightUpBack: correction=Quaterniond.Identity; break;
+                case CameraAxes.RightDownForward: correction=new Quaterniond(1,0,0,0); break;
+                case CameraAxes.ForwardLeftUp: correction=Quaterniond.FromMatrix(new Matrix3d(new Vector3d(0,-1,0),new Vector3d(0,0,1),new Vector3d(-1,0,0))); break;
+                default: throw new ArgumentOutOfRangeException(nameof(axes));
+            }
+            return new BasicPose(pose.position,pose.quaternion*correction);
+        }
+    }
     [Serializable] public sealed class EndpointConfig
     {
         public string id="multiset";
         public string url="https://api.multiset.ai/v1/vps/map/geopose";
         public string bearerTokenEnvironment="MULTISET_ACCESS_TOKEN";
         public string mapCode="",mapSetCode="";
+        public CameraAxes cameraAxes=CameraAxes.RightUpBack;
         public Uri RequestUri()
         {
             var uri=ServiceUris.Https(url);
@@ -68,6 +86,15 @@ namespace OpenArCloud.GeoPose
     public sealed class EnvironmentTokens : IAccessTokenProvider
     {
         public Task<string> GetTokenAsync(string variable,CancellationToken cancellation) => Task.FromResult(string.IsNullOrEmpty(variable)?null:Environment.GetEnvironmentVariable(variable));
+    }
+    // Tokens are kept only in memory. Useful for a device demo; production apps can provide a refreshing implementation.
+    public sealed class RuntimeTokens : IAccessTokenProvider
+    {
+        private readonly Dictionary<string,string> values=new Dictionary<string,string>();
+        public void Set(string name,string token) { if(!string.IsNullOrEmpty(name)) values[name]=token; }
+        public Task<string> GetTokenAsync(string name,CancellationToken ct) => Task.FromResult(
+            !string.IsNullOrEmpty(name) && values.TryGetValue(name,out var token) && !string.IsNullOrEmpty(token)?token:
+            string.IsNullOrEmpty(name)?null:Environment.GetEnvironmentVariable(name));
     }
     public sealed class OscpException : Exception
     {
@@ -164,7 +191,8 @@ namespace OpenArCloud.GeoPose
                         if((string)reference["contentType"]!="model/gltf-binary") continue;
                         string url=(string)reference["url"];
                         if(string.IsNullOrEmpty(url)) continue;
-                        if(!Uri.TryCreate(url,UriKind.Absolute,out var assetUri))
+                        // .NET treats a leading '/' as an absolute file URI; CDS root-relative URLs are HTTP paths.
+                        if(!Uri.TryCreate(url,UriKind.Absolute,out var assetUri) || url.StartsWith("/",StringComparison.Ordinal))
                         {
                             if(string.IsNullOrEmpty(config.assetBaseUrl)) throw new FormatException("Relative content URL requires assetBaseUrl.");
                             assetUri=new Uri(ServiceUris.Https(config.assetBaseUrl),url);

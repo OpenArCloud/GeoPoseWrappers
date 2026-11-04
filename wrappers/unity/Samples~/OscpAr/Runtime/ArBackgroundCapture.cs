@@ -26,8 +26,8 @@ namespace OpenArCloud.GeoPose.Samples
         public ARCameraBackground background;
         private TaskCompletionSource<CapturedCamera> pending;
         private float lastFrame=-100;
-        private void OnEnable() { cameraManager.frameReceived+=OnFrame; }
-        private void OnDisable() { cameraManager.frameReceived-=OnFrame; pending?.TrySetCanceled(); pending=null; }
+        private void OnEnable() { if(cameraManager!=null) cameraManager.frameReceived+=OnFrame; }
+        private void OnDisable() { if(cameraManager!=null) cameraManager.frameReceived-=OnFrame; pending?.TrySetCanceled(); pending=null; }
         private void OnFrame(ARCameraFrameEventArgs args) { lastFrame=Time.realtimeSinceStartup; }
         public Task<CapturedCamera> Capture(int longEdge,CancellationToken ct)
         {

@@ -17,3 +17,8 @@ jobs:
           dotnet-version: '8.0.x'
       - run: dotnet run --project wrappers/unity/Tests~/Core/CoreTests.csproj --configuration Release
       - run: python3 wrappers/unity/Tools~/generate-assets.py --check
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts && node validate-assets.mjs && node h3-coverage.mjs 60 10 1 8
+        working-directory: wrappers/unity/Tools~

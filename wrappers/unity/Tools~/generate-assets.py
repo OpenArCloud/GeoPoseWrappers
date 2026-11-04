@@ -41,7 +41,7 @@ def prism(polygon, height):
         j=(i+1)%len(polygon)
         result += [(bottom[i],bottom[j],top[j]),(bottom[i],top[j],top[i]),
                    ((0,0,0),bottom[j],bottom[i]),((0,height,0),top[i],top[j])]
-    return result
+    return [(a,c,b) for a,b,c in result]  # outward winding in right-handed glTF coordinates
 
 
 def main():

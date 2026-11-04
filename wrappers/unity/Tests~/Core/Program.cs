@@ -50,6 +50,8 @@ static class Program
         var camera=new BasicPose(reference.Origin,Quaterniond.FromYpr(0,0,90));
         Rot(reference.GeoPoseToUnity(camera,BodyAxes.CameraRightUpBack).Rotation,Quaterniond.Identity);
         Vec(reference.GeoPoseToUnity(originPose,BodyAxes.CameraRightUpBack).Rotation.Rotate(new Vector3d(0,0,1)),new Vector3d(0,-1,0));
+        Vec(CameraConventions.ToRightUpBack(originPose,CameraAxes.RightDownForward).quaternion.Rotate(new Vector3d(0,0,-1)),new Vector3d(0,0,1));
+        Vec(CameraConventions.ToRightUpBack(originPose,CameraAxes.ForwardLeftUp).quaternion.Rotate(new Vector3d(0,0,-1)),new Vector3d(1,0,0));
         foreach(BodyAxes axes in Enum.GetValues(typeof(BodyAxes))) Near(UnityBasis.UnityBodyToGeoBody(axes).Determinant,-1);
         // Explicit glTF source +Z vector, after glTFast X reflection, follows the original GeoPose +Z axis.
         Vec(reference.GeoPoseToUnity(originPose,BodyAxes.GltfSourceXReflection).Rotation.Rotate(new Vector3d(0,0,1)),new Vector3d(0,1,0));

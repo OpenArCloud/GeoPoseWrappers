@@ -33,6 +33,9 @@ namespace OpenArCloud.GeoPose.Samples.Editor
             var background=cameraObject.AddComponent<ARCameraBackground>();
             var planes=tracking.AddComponent<ARPlaneManager>(); planes.requestedDetectionMode=PlaneDetectionMode.Horizontal;
             var scene=new GameObject("Geographic content (ENU)").AddComponent<GeoPoseScene>();
+            var light=new GameObject("Sun").AddComponent<Light>(); light.type=LightType.Directional; light.intensity=1;
+            light.transform.rotation=Quaternion.Euler(50,-30,0);
+            RenderSettings.ambientMode=UnityEngine.Rendering.AmbientMode.Flat; RenderSettings.ambientLight=new Color(.4f,.4f,.4f);
             var app=new GameObject("OSCP AR demo");
             var capture=app.AddComponent<ArBackgroundCapture>(); capture.enabled=false;
             capture.arCamera=camera; capture.cameraManager=manager; capture.background=background; capture.enabled=true;

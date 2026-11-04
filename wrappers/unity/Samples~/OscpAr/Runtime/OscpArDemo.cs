@@ -18,6 +18,7 @@ namespace OpenArCloud.GeoPose.Samples
         public ARPlaneManager planeManager;
         [Tooltip("Approximate camera height above the desired placement plane, not a ground measurement.")]
         public double eyeHeightMetres=1.5;
+        public bool useDetectedSurface=true;
         public IAccessTokenProvider TokenProvider { get; set; } // inject your authenticated mobile token provider before Start
         private DemoConfig config;
         private HttpClient http;
@@ -27,6 +28,8 @@ namespace OpenArCloud.GeoPose.Samples
         private bool busy,localized,assetsLoaded;
         private int trackingRevision,capturedRevision;
         private double capturedFloorDistance;
+        private readonly RuntimeTokens runtimeTokens=new RuntimeTokens();
+        private string pastedVpsToken="",pastedCdsToken="";
         private string status="Capture a preview, then choose Localize to send it to the selected endpoint.";
         private readonly List<GameObject> placed=new List<GameObject>();
         private void OnEnable() { ARSession.stateChanged+=OnTrackingChanged; }
@@ -45,7 +48,7 @@ namespace OpenArCloud.GeoPose.Samples
             {
                 config=DemoConfig.Parse(configuration.text); config.Selected().RequestUri();
                 http=new HttpClient(new HttpClientHandler { AllowAutoRedirect=false }) { Timeout=TimeSpan.FromSeconds(40) };
-                lifetime=new CancellationTokenSource(); client=new OscpClient(http,TokenProvider);
+                lifetime=new CancellationTokenSource(); client=new OscpClient(http,TokenProvider??runtimeTokens);
                 if(config.includeLocationHint) Input.location.Start();
             }
             catch(Exception e) { status=e.Message; enabled=false; }
@@ -58,7 +61,7 @@ namespace OpenArCloud.GeoPose.Samples
                 ClearCapture(); capturedRevision=trackingRevision;
                 captured=await capture.Capture(config.imageLongEdge,lifetime.Token);
                 capturedFloorDistance=FloorBelowCamera(captured.TrackedPose.Position.ToVector3());
-                status="Check that the preview is upright and text is not mirrored. Localize sends this image to "+config.Selected().id+".";
+                status="Check that the preview is upright and text is not mirrored. Initial origin drop: "+capturedFloorDistance.ToString("F2")+" m. Localize sends this image to "+config.Selected().id+".";
             }
             catch(Exception e) { status=e.Message; }
             finally { busy=false; }
@@ -70,15 +73,17 @@ namespace OpenArCloud.GeoPose.Samples
             {
                 if(ARSession.state!=ARSessionState.SessionTracking || capturedRevision!=trackingRevision) throw new InvalidOperationException("AR tracking was lost. Capture a new image.");
                 if(captured.ScreenOrientation!=Screen.orientation) throw new InvalidOperationException("Screen orientation changed. Capture a new image.");
+                if(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()-captured.Image.TimestampMs>30000) throw new InvalidOperationException("Preview is more than 30 seconds old. Capture again.");
                 if(config.includeLocationHint && Input.location.status==LocationServiceStatus.Running)
                 {
                     var fix=Input.location.lastData;
                     captured.Image.LocationHint=new GeoPosition(fix.latitude,fix.longitude,fix.altitude);
                 }
                 status="Localizing with "+config.Selected().id+"…";
-                var pose=await client.Localize(config.Selected(),captured.Image,lifetime.Token);
+                var endpoint=config.Selected();
+                var pose=CameraConventions.ToRightUpBack(await client.Localize(endpoint,captured.Image,lifetime.Token),endpoint.cameraAxes);
                 lifetime.Token.ThrowIfCancellationRequested();
-                if(ARSession.state!=ARSessionState.SessionTracking || capturedRevision!=trackingRevision) throw new InvalidOperationException("Tracking changed during localization. Capture again.");
+                if(ARSession.state!=ARSessionState.SessionTracking || capturedRevision!=trackingRevision || captured.ScreenOrientation!=Screen.orientation) throw new InvalidOperationException("Tracking or screen orientation changed during localization. Capture again.");
                 if(!localized) geographicScene.Rebase(new GeoPosition(pose.position.lat,pose.position.lon,pose.position.h-capturedFloorDistance));
                 geographicScene.AlignToCamera(pose,captured.TrackedPose);
                 geographicScene.gameObject.SetActive(true); localized=true;
@@ -89,6 +94,7 @@ namespace OpenArCloud.GeoPose.Samples
                     if(config.discovery.enabled) await PlaceDiscovered(pose,lifetime.Token);
                     assetsLoaded=true;
                 }
+                if(capturedRevision!=trackingRevision) throw new InvalidOperationException("Tracking changed while loading content. Localize again.");
                 status="Localized. "+placed.Count+" assets anchored in the shared ENU frame.";
                 ClearCapture();
             }
@@ -99,7 +105,7 @@ namespace OpenArCloud.GeoPose.Samples
         private double FloorBelowCamera(Vector3 cameraPosition)
         {
             double nearest=double.PositiveInfinity;
-            if(planeManager!=null) foreach(var plane in planeManager.trackables)
+            if(useDetectedSurface && planeManager!=null) foreach(var plane in planeManager.trackables)
             {
                 if(plane.trackingState!=TrackingState.Tracking || plane.alignment!=PlaneAlignment.HorizontalUp || Vector3.Dot(plane.transform.up,Vector3.up)<0.98f) continue;
                 var surface=new Plane(plane.transform.up,plane.transform.position);
@@ -162,7 +168,14 @@ namespace OpenArCloud.GeoPose.Samples
             GUILayout.Label("OSCP GeoPose AR · "+config.selectedEndpoint); GUILayout.Label(status);
             GUI.enabled=!busy;
             foreach(var endpoint in config.endpoints)
-                if(GUILayout.Toggle(config.selectedEndpoint==endpoint.id,endpoint.id) && config.selectedEndpoint!=endpoint.id) config.selectedEndpoint=endpoint.id;
+                if(GUILayout.Toggle(config.selectedEndpoint==endpoint.id,endpoint.id) && config.selectedEndpoint!=endpoint.id) {config.selectedEndpoint=endpoint.id;pastedVpsToken="";ClearCapture();}
+            if(TokenProvider==null)
+            {
+                GUILayout.Label("Optional short-lived VPS bearer token (memory only; environment fallback)");
+                pastedVpsToken=GUILayout.PasswordField(pastedVpsToken,'*'); runtimeTokens.Set(config.Selected().bearerTokenEnvironment,pastedVpsToken);
+                if(config.discovery.enabled) { GUILayout.Label("Optional CDS bearer token (separate credential)"); pastedCdsToken=GUILayout.PasswordField(pastedCdsToken,'*'); runtimeTokens.Set(config.discovery.bearerTokenEnvironment,pastedCdsToken); }
+            }
+            useDetectedSurface=GUILayout.Toggle(useDetectedSurface,"Use horizontal surface beneath camera for initial origin");
             if(GUILayout.Button("Capture preview",GUILayout.Height(40))) CapturePreview();
             if(captured!=null)
             {

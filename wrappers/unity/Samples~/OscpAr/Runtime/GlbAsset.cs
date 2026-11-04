@@ -11,9 +11,11 @@ namespace OpenArCloud.GeoPose.Samples
     {
         private GltfImport import;
         private bool destroyed;
+        private bool loading;
         public async Task Load(string uri,CancellationToken cancellation)
         {
-            import=new GltfImport();
+            if(import!=null) throw new InvalidOperationException("Use one GlbAsset per imported file.");
+            import=new GltfImport(); loading=true;
             try
             {
                 if(!await import.Load(uri,cancellationToken:cancellation)) throw new InvalidOperationException("Could not load GLB asset.");
@@ -22,7 +24,8 @@ namespace OpenArCloud.GeoPose.Samples
                 if(!await import.InstantiateMainSceneAsync(transform,cancellationToken:cancellation)) throw new InvalidOperationException("Could not instantiate GLB asset.");
             }
             catch { if(import!=null) { import.Dispose(); import=null; } throw; }
+            finally { loading=false; if(destroyed && import!=null) { import.Dispose(); import=null; } }
         }
-        private void OnDestroy() { destroyed=true; if(import!=null) { import.Dispose(); import=null; } }
+        private void OnDestroy() { destroyed=true; if(!loading && import!=null) { import.Dispose(); import=null; } }
     }
 }

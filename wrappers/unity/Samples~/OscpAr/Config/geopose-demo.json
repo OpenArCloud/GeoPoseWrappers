@@ -5,6 +5,7 @@
       "id": "multiset",
       "url": "https://api.multiset.ai/v1/vps/map/geopose",
       "bearerTokenEnvironment": "MULTISET_ACCESS_TOKEN",
+      "cameraAxes": "RightUpBack",
       "mapCode": "REPLACE_WITH_YOUR_GEOREFERENCED_MAP_CODE",
       "mapSetCode": ""
     }
