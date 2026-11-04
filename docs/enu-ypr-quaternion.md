@@ -61,7 +61,7 @@ A rotation has a **physical angle** $\alpha$ and a **unit axis**
 $\hat{\mathbf{a}}=(a_x,a_y,a_z)$ pointing along its positive rotation axis.
 Its unit quaternion, written in xyzw order, is:
 
-$
+```math
 (x,y,z,w)=
 \left(
 a_x\sin(\alpha/2),\;
@@ -69,7 +69,7 @@ a_y\sin(\alpha/2),\;
 a_z\sin(\alpha/2),\;
 \cos(\alpha/2)
 \right).
-$
+```
 
 The axis determines the direction of the quaternion's vector part $(x,y,z)$.
 The sine and cosine use **half the physical rotation angle**. This is how
@@ -78,9 +78,9 @@ quaternions encode a rotation; it does not halve the object's rotation.
 For pure yaw, the axis is +Up, so $\hat{\mathbf{a}}=(0,0,1)$ and
 $\alpha=\psi$ (yaw). The formula simplifies to:
 
-$
+```math
 (x,y,z,w)=\left(0,0,\sin(\psi/2),\cos(\psi/2)\right).
-$
+```
 
 | Physical yaw $\psi$ | Half-angle $\psi/2$ used in the quaternion | $z$ | $w$ |
 | --- | --- | --- | --- |
@@ -91,7 +91,7 @@ $
 the half-angle works is to apply this yaw quaternion to the object's +x axis.
 Its resulting ENU coordinates are:
 
-$
+```math
 (1-2z^2,\;2wz,\;0)
 =
 \left(
@@ -101,7 +101,7 @@ $
 \right)
 =
 (\cos\psi,\;\sin\psi,\;0).
-$
+```
 
 The double-angle identities recover the full physical yaw $\psi$.
 At +90° this vector is $(0,1,0)$: North.
