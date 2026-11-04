@@ -171,11 +171,13 @@ namespace OpenArCloud.GeoPose
             if((string)response["type"]!="geopose" || response["geopose"]==null) throw new FormatException("Expected an OSCP GeoPose response.");
             return GeoPoseJson.Parse(response["geopose"]);
         }
-        public async Task<IReadOnlyList<DiscoveredAsset>> Discover(DiscoveryConfig config,CancellationToken ct=default)
+        public async Task<IReadOnlyList<DiscoveredAsset>> Discover(DiscoveryConfig config,GeoPosition searchOrigin,CancellationToken ct=default)
         {
             var result=new List<DiscoveredAsset>(); var seen=new HashSet<string>();
             if(!config.enabled) return result;
             if(string.IsNullOrWhiteSpace(config.topic) || config.h3Indexes==null || config.h3Indexes.Length==0 || config.maxAssets<1) throw new ArgumentException("Discovery needs a topic, H3 coverage cells and a positive maxAssets.");
+            if(Numbers.Finite(config.maxDistanceMetres)<=0) throw new ArgumentException("maxDistanceMetres must be positive and finite.");
+            var originEcef=Wgs84.ToEcef(searchOrigin);
             var root=ServiceUris.Https(config.url.TrimEnd('/')+"/scrs/"+Uri.EscapeDataString(config.topic));
             foreach(string cell in config.h3Indexes)
             {
@@ -191,6 +193,9 @@ namespace OpenArCloud.GeoPose
                         if((string)reference["contentType"]!="model/gltf-binary") continue;
                         string url=(string)reference["url"];
                         if(string.IsNullOrEmpty(url)) continue;
+                        var pose=GeoPoseJson.Parse(content["geopose"]);
+                        // Only nearby assets count toward maxAssets; continue across records/cells otherwise.
+                        if((Wgs84.ToEcef(pose.position)-originEcef).Length>config.maxDistanceMetres) break;
                         // .NET treats a leading '/' as an absolute file URI; CDS root-relative URLs are HTTP paths.
                         if(!Uri.TryCreate(url,UriKind.Absolute,out var assetUri) || url.StartsWith("/",StringComparison.Ordinal))
                         {
@@ -198,7 +203,7 @@ namespace OpenArCloud.GeoPose
                             assetUri=new Uri(ServiceUris.Https(config.assetBaseUrl),url);
                         }
                         assetUri=ServiceUris.Https(assetUri.AbsoluteUri);
-                        result.Add(new DiscoveredAsset { Id=id,Title=(string)content["title"]??id,Url=assetUri,Pose=GeoPoseJson.Parse(content["geopose"]) }); seen.Add(id);
+                        result.Add(new DiscoveredAsset { Id=id,Title=(string)content["title"]??id,Url=assetUri,Pose=pose }); seen.Add(id);
                         break;
                     }
                     if(result.Count>=config.maxAssets) return result;

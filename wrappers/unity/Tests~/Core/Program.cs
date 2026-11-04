@@ -144,9 +144,52 @@ static class Program
             return Task.FromResult(Response(new JArray(record).ToString()));
         };
         var discovery=new DiscoveryConfig {enabled=true,url="https://cds.example",topic="art",h3Indexes=new[]{"881f1d4887fffff","881f1d4881fffff"},bearerTokenEnvironment="CDS_TOKEN",assetBaseUrl="https://assets.example/"};
-        var assets=await client.Discover(discovery);Check(queries==2 && assets.Count==1,"Deduplicate records across cells");
+        var assets=await client.Discover(discovery,pose.position);Check(queries==2 && assets.Count==1,"Deduplicate records across cells");
         Check(assets[0].Url.AbsoluteUri=="https://assets.example/models/test.glb","Resolve content base URL");Rot(assets[0].Pose.quaternion,pose.quaternion);
+        await DiscoveryDistanceTests(client,handler,discovery,pose);
         var config=DemoConfig.Parse("{\"selectedEndpoint\":\"second\",\"endpoints\":[{\"id\":\"first\"},{\"id\":\"second\",\"url\":\"https://other.example/vps\"}],\"discovery\":{\"bodyAxes\":\"GltfSourceXReflection\"}}");
         Check(config.Selected().url=="https://other.example/vps" && config.discovery.bodyAxes==BodyAxes.GltfSourceXReflection,"Config endpoint selection and body preset");
+    }
+    static async Task DiscoveryDistanceTests(OscpClient client,Handler handler,DiscoveryConfig discovery,BasicPose origin)
+    {
+        var frame=new GeoReference(origin.position);
+        JObject Record(string id,double metres) => new JObject { ["id"]=id,["type"]="scr",["content"]=new JObject {
+            ["geopose"]=GeoPoseJson.ToObject(new BasicPose(frame.EnuToGeodetic(new Vector3d(metres,0,0)),Quaterniond.Identity)),
+            ["refs"]=new JArray(new JObject { ["contentType"]="model/gltf-binary",["url"]="https://assets.example/"+id+".glb" }) } };
+        discovery.maxAssets=2; discovery.maxDistanceMetres=100;
+        int queries=0;
+        handler.Reply=request=>
+        {
+            queries++;
+            return Task.FromResult(Response(new JArray(Record("far-1",200),Record("far-2",300),Record("near-1",10),Record("near-2",20),Record("near-3",30)).ToString()));
+        };
+        var nearby=await client.Discover(discovery,origin.position);
+        Check(nearby.Count==2 && nearby[0].Id=="near-1" && nearby[1].Id=="near-2","Distant records must not exhaust the cap before later nearby records");
+        Check(queries==1,"Stop querying once enough eligible assets are collected");
+
+        queries=0;
+        discovery.h3Indexes=new[]{"881f1d4887fffff","881f1d4881fffff","881f1d4883fffff"};
+        handler.Reply=request=>
+        {
+            queries++;
+            JArray records=queries==1?new JArray(Record("far-1",200),Record("far-2",300)):
+                queries==2?new JArray(Record("near-1",10)):
+                new JArray(Record("near-1",10),Record("far-3",400),Record("near-2",20),Record("near-3",30));
+            return Task.FromResult(Response(records.ToString()));
+        };
+        nearby=await client.Discover(discovery,origin.position);
+        Check(queries==3,"Continue past an out-of-range cell and a partially filled result");
+        Check(nearby.Count==2 && nearby[0].Id=="near-1" && nearby[1].Id=="near-2","Duplicates and distant assets across cells must not count toward the cap");
+
+        queries=0;
+        handler.Reply=request=> { queries++;return Task.FromResult(Response(new JArray(Record("far",200)).ToString())); };
+        nearby=await client.Discover(discovery,origin.position);
+        Check(nearby.Count==0 && queries==3,"Exhaust coverage when no asset is nearby");
+        foreach(double invalid in new[]{0.0,-1.0,double.NaN,double.PositiveInfinity})
+        {
+            discovery.maxDistanceMetres=invalid; bool rejected=false;
+            try {await client.Discover(discovery,origin.position);}catch(ArgumentException){rejected=true;}
+            Check(rejected && queries==3,"Reject invalid discovery distance before any request");
+        }
     }
 }

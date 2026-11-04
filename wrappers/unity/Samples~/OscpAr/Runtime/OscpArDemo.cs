@@ -149,11 +149,8 @@ namespace OpenArCloud.GeoPose.Samples
         }
         private async Task PlaceDiscovered(BasicPose camera,CancellationToken ct)
         {
-            var origin=Wgs84.ToEcef(camera.position);
-            if(config.discovery.maxDistanceMetres<=0) throw new ArgumentException("maxDistanceMetres must be positive.");
-            foreach(var asset in await client.Discover(config.discovery,ct))
+            foreach(var asset in await client.Discover(config.discovery,camera.position,ct))
             {
-                if((Wgs84.ToEcef(asset.Pose.position)-origin).Length>config.discovery.maxDistanceMetres) continue;
                 await AddAsset(asset.Title,asset.Url.AbsoluteUri,asset.Pose,config.discovery.bodyAxes,ct);
             }
         }
