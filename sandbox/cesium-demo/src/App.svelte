@@ -6,7 +6,7 @@
     Cartesian3,
     Color,
     Entity,
-    HeadingPitchRoll,
+    HeadingPitchRange,
     Transforms,
     Math as CesiumMath,
   } from "cesium";
@@ -19,6 +19,8 @@
     createEntityFromGeoPose,
     type GeoPose,
   } from "cesium-geopose";
+
+  import { yprToQuaternion } from "geopose-lib";
 
   let cesiumContainer: HTMLDivElement;
   let viewer: Viewer | null = null;
@@ -96,15 +98,15 @@
   let inputLat = 48.8584;
   let inputLon = 2.2945;
   let inputHeight = 1000;
-  let inputHeading = 0;
-  let inputPitch = -45;
-  let inputRoll = 0;
+  let inputYaw = 0;
+  let inputPitch = 0;
+  let inputRoll = 45;
 
   // Entity input fields
   let entityLat = 40.7128;
   let entityLon = -74.006;
   let entityHeight = 500;
-  let entityHeading = 45;
+  let entityYaw = 45;
   let entityPitch = 0;
   let entityRoll = 0;
 
@@ -117,25 +119,9 @@
     { name: "Big Ben", lat: 51.5007, lon: -0.1246, h: 400 },
   ];
 
-  // Convert heading/pitch/roll to quaternion for display
-  function hprToQuat(h: number, p: number, r: number) {
-    const hRad = CesiumMath.toRadians(h);
-    const pRad = CesiumMath.toRadians(p);
-    const rRad = CesiumMath.toRadians(r);
-
-    const cy = Math.cos(hRad / 2);
-    const sy = Math.sin(hRad / 2);
-    const cp = Math.cos(pRad / 2);
-    const sp = Math.sin(pRad / 2);
-    const cr = Math.cos(rRad / 2);
-    const sr = Math.sin(rRad / 2);
-
-    return {
-      x: sr * cp * cy - cr * sp * sy,
-      y: cr * sp * cy + sr * cp * sy,
-      z: cr * cp * sy - sr * sp * cy,
-      w: cr * cp * cy + sr * sp * sy,
-    };
+  // Right-handed intrinsic Z-Y-X; these inputs are GeoPose angles in degrees.
+  function yprToQuat(yaw: number, pitch: number, roll: number) {
+    return yprToQuaternion({ position: { lat: 0, lon: 0, h: 0 }, angles: { yaw, pitch, roll } }).quaternion;
   }
 
   // Update camera pose display
@@ -150,7 +136,7 @@
 
     const geoPose: GeoPose = {
       position: { lat: inputLat, lon: inputLon, h: inputHeight },
-      quaternion: hprToQuat(inputHeading, inputPitch, inputRoll),
+      quaternion: yprToQuat(inputYaw, inputPitch, inputRoll),
     };
 
     flyCameraToGeoPose(viewer.camera, geoPose, 2);
@@ -162,7 +148,7 @@
 
     const geoPose: GeoPose = {
       position: { lat: inputLat, lon: inputLon, h: inputHeight },
-      quaternion: hprToQuat(inputHeading, inputPitch, inputRoll),
+      quaternion: yprToQuat(inputYaw, inputPitch, inputRoll),
     };
 
     setCameraGeoPose(viewer.camera, geoPose);
@@ -188,7 +174,7 @@
 
     const geoPose: GeoPose = {
       position: { lat: entityLat, lon: entityLon, h: entityHeight },
-      quaternion: hprToQuat(entityHeading, entityPitch, entityRoll),
+      quaternion: yprToQuat(entityYaw, entityPitch, entityRoll),
     };
 
     const selectedModel = getSelectedModel();
@@ -256,7 +242,7 @@
 
     viewer.flyTo(demoEntity, {
       duration: 2,
-      offset: new HeadingPitchRoll(0, CesiumMath.toRadians(-45), 0) as any,
+      offset: new HeadingPitchRange(0, CesiumMath.toRadians(-45), 0),
     });
   }
 
@@ -277,7 +263,7 @@
       baseLayerPicker: true,
       geocoder: false,  // Geocoder requires Ion token
       homeButton: true,
-      sceneModePicker: true,
+      sceneModePicker: false,
       navigationHelpButton: false,
       fullscreenButton: false,
     });
@@ -348,6 +334,7 @@
       <!-- Set Camera Position -->
       <section class="section">
         <h2>Set Camera GeoPose</h2>
+        <p>Right-handed ENU yaw: East toward North. Camera +X right, +Y up, −Z view. Identity looks down; roll +90° with yaw/pitch zero looks North.</p>
 
         <div class="presets">
           <span class="label">Presets:</span>
@@ -377,11 +364,11 @@
             />
           </div>
           <div class="input-group">
-            <label for="heading">Heading (°)</label>
+            <label for="heading" title="Positive yaw turns East toward North. Camera +X=right, +Y=up, -Z=view; identity looks down.">ENU yaw (°)</label>
             <input
               id="heading"
               type="number"
-              bind:value={inputHeading}
+              bind:value={inputYaw}
               step="5"
             />
           </div>
@@ -458,11 +445,11 @@
             />
           </div>
           <div class="input-group">
-            <label for="eheading">Heading (°)</label>
+            <label for="eheading" title="Positive yaw rotates local +X East toward North. Model geometry may have a different visual forward axis.">ENU yaw (°)</label>
             <input
               id="eheading"
               type="number"
-              bind:value={entityHeading}
+              bind:value={entityYaw}
               step="15"
             />
           </div>

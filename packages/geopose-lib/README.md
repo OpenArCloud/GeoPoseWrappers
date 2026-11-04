@@ -68,3 +68,15 @@ npm run build
 
 MIT. The license is selected for comprehension and familiarity in the developer community.
 OARC works for the benefit of all of humanity and regards our output as belonging to the public domain in perpetuity, so it is not intended to be subject to legal actions to prevent use or derivative work, in the spirit of the WTFPL (https://en.wikipedia.org/wiki/WTFPL).
+
+
+## Rotation semantics
+
+YPR uses right-handed intrinsic Z–Y–X in ENU: yaw +90° turns body +X from
+East toward North. Positive pitch tilts +X down. `heading` is a legacy yaw
+alias, not compass heading. Named East/North/Up rotation methods rotate
+about fixed ENU axes; they are not Euler-component increments.
+
+Relative poses retain ENU translation and use body-relative rotation.
+See the [audit and migration notes](../../docs/rotation-consistency.md) for
+changed behavior, the singularity policy and verification commands.

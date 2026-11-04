@@ -10,13 +10,14 @@ import {
   type Entity,
   type JulianDate
 } from "cesium";
-import { quaternionToYPR, yprToQuaternion } from "geopose-lib";
 import type { GeoPose, LLH, Quaternion } from "geopose-lib";
 
 const IDENTITY_QUATERNION = { x: 0, y: 0, z: 0, w: 1 };
 
 /**
- * Convert a Cesium camera pose to GeoPose (Basic Quaternion).
+ * Convert a Cesium 3D camera to GeoPose. Body axes: +X right, +Y up, -Z view.
+ * The quaternion maps those camera axes into ENU; identity looks straight down.
+ * Cesium compass heading is not GeoPose yaw.
  */
 export function getCameraGeoPose(camera: Camera): GeoPose {
   const cartographic = camera.positionCartographic;
@@ -26,13 +27,17 @@ export function getCameraGeoPose(camera: Camera): GeoPose {
     h: cartographic.height
   };
 
-  const ypr = {
-    yaw: CesiumMath.toDegrees(camera.heading),
-    pitch: CesiumMath.toDegrees(camera.pitch),
-    roll: CesiumMath.toDegrees(camera.roll)
-  };
-
-  return yprToQuaternion({ position, angles: ypr });
+  // Columns are the camera's local +X (right), +Y (up), +Z (backward).
+  // Use world vectors: camera.transform may be nonidentity.
+  const rotation = new Matrix3();
+  Matrix3.setColumn(rotation, 0, camera.rightWC, rotation);
+  Matrix3.setColumn(rotation, 1, camera.upWC, rotation);
+  Matrix3.setColumn(rotation, 2, Cartesian3.negate(camera.directionWC, new Cartesian3()), rotation);
+  const world = CesiumQuaternion.fromRotationMatrix(rotation);
+  const inverseEnu = CesiumQuaternion.conjugate(getEnuToEcefQuaternion(position), new CesiumQuaternion());
+  const q = CesiumQuaternion.multiply(inverseEnu, world, new CesiumQuaternion());
+  CesiumQuaternion.normalize(q, q);
+  return { position, quaternion: { x: q.x, y: q.y, z: q.z, w: q.w } };
 }
 
 /**
@@ -45,15 +50,10 @@ export function setCameraGeoPose(camera: Camera, geoPose: GeoPose): void {
     geoPose.position.h
   );
 
-  const ypr = quaternionToYPR(geoPose);
 
   camera.setView({
     destination,
-    orientation: {
-      heading: CesiumMath.toRadians(ypr.angles.yaw),
-      pitch: CesiumMath.toRadians(ypr.angles.pitch),
-      roll: CesiumMath.toRadians(ypr.angles.roll)
-    }
+    orientation: cameraDirectionUp(geoPose)
   });
 }
 
@@ -71,15 +71,10 @@ export function flyCameraToGeoPose(
     geoPose.position.h
   );
 
-  const ypr = quaternionToYPR(geoPose);
 
   camera.flyTo({
     destination,
-    orientation: {
-      heading: CesiumMath.toRadians(ypr.angles.yaw),
-      pitch: CesiumMath.toRadians(ypr.angles.pitch),
-      roll: CesiumMath.toRadians(ypr.angles.roll)
-    },
+    orientation: cameraDirectionUp(geoPose),
     duration
   });
 }
@@ -158,7 +153,7 @@ export function createEntityFromGeoPose(geoPose: GeoPose): {
 function getEnuToEcefQuaternion(position: LLH): CesiumQuaternion {
   const origin = Cartesian3.fromDegrees(position.lon, position.lat, position.h);
   const transform = Transforms.eastNorthUpToFixedFrame(origin);
-  const rotation = Matrix4.getRotation(transform, new Matrix3());
+  const rotation = Matrix4.getMatrix3(transform, new Matrix3());
   return CesiumQuaternion.fromRotationMatrix(rotation);
 }
 
@@ -177,4 +172,15 @@ function toEcefQuaternion(position: LLH, enuQuaternion: Quaternion): CesiumQuate
   );
   CesiumQuaternion.normalize(ecefQuat, ecefQuat);
   return ecefQuat;
+}
+
+
+/** Direction and up in ECEF for Cesium's 3D setView/flyTo API. */
+function cameraDirectionUp(geoPose: GeoPose): { direction: Cartesian3; up: Cartesian3 } {
+  const rotation = Matrix3.fromQuaternion(toEcefQuaternion(geoPose.position, geoPose.quaternion));
+  const backward = Matrix3.getColumn(rotation, 2, new Cartesian3());
+  return {
+    direction: Cartesian3.negate(backward, backward),
+    up: Matrix3.getColumn(rotation, 1, new Cartesian3())
+  };
 }

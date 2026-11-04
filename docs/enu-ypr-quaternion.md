@@ -204,9 +204,9 @@ For this **+90° yaw**, the half-angle rule above gives
 Both components are positive; the object rotates the full **90°**.
 The physical check is:
 
-$$
+```math
 (1,0,0)_{\mathrm{object}} \mapsto (0,1,0)_{\mathrm{ENU}}.
-$$
+```
 
 That is **East to North**, not North to East.
 
@@ -341,16 +341,16 @@ $x \times y = z$.
 
 Use column vectors and define:
 
-$$
+```math
 v_{\mathrm{ENU}} = R\,v_{\mathrm{object}},
 \qquad
 R = R_z(\psi)\,R_y(\theta)\,R_x(\phi),
-$$
+```
 
 where $\psi$ is yaw, $\theta$ is pitch, and $\phi$ is roll.
 Each elementary matrix is a right-handed positive rotation:
 
-$$
+```math
 R_x(\phi)=
 \begin{bmatrix}
 1&0&0\\
@@ -364,16 +364,16 @@ R_y(\theta)=
 0&1&0\\
 -\sin\theta&0&\cos\theta
 \end{bmatrix},
-$$
+```
 
-$$
+```math
 R_z(\psi)=
 \begin{bmatrix}
 \cos\psi&-\sin\psi&0\\
 \sin\psi&\cos\psi&0\\
 0&0&1
 \end{bmatrix}.
-$$
+```
 
 The columns of $R$ are the object's x, y, z axes expressed in ENU.
 Intrinsic yaw–pitch–roll produces this product by successively rotating the
@@ -389,28 +389,28 @@ Do not confuse this passive change of coordinates with turning the object.
 
 GeoPose Basic YPR stores **degrees**. First convert each angle to radians:
 
-$$
+```math
 \alpha_{\mathrm{rad}}=\alpha_{\mathrm{deg}}\frac{\pi}{180}.
-$$
+```
 
 Define the half-angle terms:
 
-$$
+```math
 c_\psi=\cos(\psi/2),\quad s_\psi=\sin(\psi/2),\qquad
 c_\theta=\cos(\theta/2),\quad s_\theta=\sin(\theta/2),\qquad
 c_\phi=\cos(\phi/2),\quad s_\phi=\sin(\phi/2).
-$$
+```
 
 Then the quaternion components are:
 
-$$
+```math
 \begin{aligned}
 x &= s_\phi c_\theta c_\psi-c_\phi s_\theta s_\psi,\\
 y &= c_\phi s_\theta c_\psi+s_\phi c_\theta s_\psi,\\
 z &= c_\phi c_\theta s_\psi-s_\phi s_\theta c_\psi,\\
 w &= c_\phi c_\theta c_\psi+s_\phi s_\theta s_\psi.
 \end{aligned}
-$$
+```
 
 These are the formulas in
 [the core conversion implementation](../packages/geopose-lib/src/core/conversions.ts).
@@ -422,33 +422,33 @@ $q=(0,0,\sin(\psi/2),\cos(\psi/2))$ in **xyzw** notation.
 Write a quaternion as $(\mathbf{u},w)$, with vector part
 $\mathbf{u}=(x,y,z)$ and scalar part $w$. Hamilton multiplication is:
 
-$$
+```math
 (\mathbf{u}_a,w_a)\otimes(\mathbf{u}_b,w_b)
 =
 \left(
 w_a\mathbf{u}_b+w_b\mathbf{u}_a+\mathbf{u}_a\times\mathbf{u}_b,\;
 w_aw_b-\mathbf{u}_a\cdot\mathbf{u}_b
 \right).
-$$
+```
 
 For a unit axis $\hat{\mathbf{a}}$ and angle $\alpha$ in radians:
 
-$$
+```math
 q_{\hat{\mathbf{a}}}(\alpha)
 =\left(\hat{\mathbf{a}}\sin(\alpha/2),\cos(\alpha/2)\right).
-$$
+```
 
 Thus $q=q_z(\psi)\otimes q_y(\theta)\otimes q_x(\phi)$.
 For the step-by-step sequence, angles below are written in degrees for clarity:
 
-$$
+```math
 \begin{aligned}
 q_{B0}&=(0,0,0,1),\\
 q_{B1}&=q_{B0}\otimes q_z(90^\circ),\\
 q_{B2}&=q_{B1}\otimes q_y(45^\circ),\\
 q_{B3}&=q_{B2}\otimes q_x(90^\circ).
 \end{aligned}
-$$
+```
 
 **Right-multiplication** applies an increment about the object's current axes.
 **Left-multiplication** applies an increment expressed about the fixed ENU
@@ -466,13 +466,13 @@ First ensure that the quaternion is finite, nonzero, and unit length.
 If needed, divide all four components by
 $\sqrt{x^2+y^2+z^2+w^2}$. For this convention:
 
-$$
+```math
 \begin{aligned}
 \phi &= \mathrm{atan2}\!\left(2(wx+yz),\,1-2(x^2+y^2)\right),\\
 \theta &= \arcsin\!\left(\mathrm{clamp}\!\left(2(wy-zx),-1,1\right)\right),\\
 \psi &= \mathrm{atan2}\!\left(2(wz+xy),\,1-2(y^2+z^2)\right).
 \end{aligned}
-$$
+```
 
 Convert each result from radians to degrees by multiplying by $180/\pi$.
 In `atan2(a, b)`, `a` is the sine-like numerator and `b` the cosine-like
@@ -480,9 +480,13 @@ denominator; ordinary `atan(a / b)` loses quadrant information.
 
 The usual result ranges are pitch in [−90°, +90°], and yaw/roll in
 [−180°, +180°]. At pitch ±90°, yaw and roll are coupled (**gimbal lock**);
-there is no unique pair to recover. A production conversion must choose and
-document a singularity policy. This guide's mixed-angle example uses 45°
-pitch to avoid that ambiguity.
+there is no unique pair to recover. The source implementations choose roll = 0,
+pitch = ±90°, and yaw = `2 atan2(z, w)` wrapped into [−180°, +180°]. This branch
+is used when `1 − abs(sin(pitch)) <= 1e-12`; within that tiny neighborhood it
+snaps to the singular orientation. Input is normalized first; zero and
+non-finite quaternions are rejected. The same policy is used in TypeScript,
+Kotlin and Swift. This guide's mixed-angle example uses 45° pitch to avoid
+the singularity. The published `geopose-lib@0.0.2` predates this policy.
 
 Quaternions $q$ and $-q$ describe the same orientation. Euler triples can also
 have equivalent representations. For general tests, compare rotation matrices
@@ -550,20 +554,32 @@ Mathematical ENU yaw is zero when object +x points East and positive toward
 North. A conventional compass heading is zero at North and positive toward
 East. For the same horizontal +x-forward direction:
 
-$$
+```math
 \mathrm{yaw}_{ENU}=90^\circ-\mathrm{heading}_{compass}\pmod{360^\circ}.
-$$
+```
 
 This scalar relationship is **not a complete camera-pose conversion**: camera
 forward/up axes and pitch/roll signs must also be mapped.
 
-In the repository revision reviewed for this guide, some `GeoPoseBasic` and
-type comments describe yaw using compass language, and `heading` is a direct
-alias for `yaw`. The Cesium camera adapters also pass camera heading directly
-to the YPR helpers. These are known inconsistencies with the convention shown
-here. Use the core YPR/quaternion functions for these examples; do not treat
-the alias or a successful camera round trip as proof of heading compatibility.
-This documentation change does not repair those adapters.
+The source adapters now use the physical camera basis, converting the columns
+`[right, up, -direction]` between ECEF and ENU. The camera's **body axes** are
++x right, +y up, and −z forward, matching native AR camera axes. These differ
+from the +x-forward object drawn in the illustrations. A frame conversion
+preserves those body axes; it does not rename the camera's forward axis.
+
+| Camera Basic YPR (degrees) | View direction | Camera up |
+| --- | --- | --- |
+| yaw 0, pitch 0, roll 0 | Down | North |
+| yaw 0, pitch 0, roll +90 | North | Up |
+| yaw −90, pitch 0, roll +90 | East | Up |
+
+`GeoPoseBasic.heading` remains a legacy alias for mathematical `yaw`, for
+compatibility. It is **not compass heading**; prefer the explicitly named
+`yaw` property. The old direct Cesium heading mapping was incorrect and its
+stored camera quaternions must be regenerated or migrated. See the
+[rotation audit and migration notes](rotation-consistency.md) for the fixed
+APIs, demo coordinate systems, build instructions and validation limits.
+The published npm baseline used earlier in this guide predates these fixes.
 
 ## Verification and reusable assets
 

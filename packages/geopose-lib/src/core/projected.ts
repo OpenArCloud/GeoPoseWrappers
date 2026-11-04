@@ -69,13 +69,13 @@ export function projectedToPosition(
  * Transform a GeoPose (WGS84 + quaternion) to a projected 6DOF pose.
  *
  * The position is transformed using proj4. The orientation quaternion is
- * preserved as-is, assuming the projected coordinate system is approximately
- * aligned with ENU (East-North-Up), which is true for most projected CRS
- * like UTM where X≈East and Y≈North.
+ * retained relative to true local ENU. Projected grid axes generally differ
+ * by meridian convergence (and projection distortion); this is not a grid-frame
+ * quaternion. Only the position is projected.
  *
  * @param geoPose - Source GeoPose in WGS84.
  * @param epsg - Target EPSG code, e.g., "EPSG:32632".
- * @returns ProjectedPose with x, y, z coordinates and quaternion orientation.
+ * @returns ProjectedPose with x, y, z coordinates and an ENU quaternion.
  */
 export function geoPoseToProjected(geoPose: GeoPose, epsg: string): ProjectedPose {
     const { x, y, z } = positionToProjected(
@@ -97,8 +97,7 @@ export function geoPoseToProjected(geoPose: GeoPose, epsg: string): ProjectedPos
  * Transform a projected 6DOF pose back to a GeoPose (WGS84).
  *
  * The position is transformed using proj4. The orientation quaternion is
- * preserved as-is, assuming the projected coordinate system is approximately
- * aligned with ENU.
+ * expressed in true local ENU, not projected grid axes.
  *
  * @param pose - Source ProjectedPose (includes epsg).
  * @returns GeoPose in WGS84.

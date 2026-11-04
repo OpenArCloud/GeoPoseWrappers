@@ -19,7 +19,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm test && npm run build",
+    "test": "vitest run"
   },
   "keywords": [
     "geopose",
@@ -40,12 +41,13 @@
   },
   "peerDependencies": {
     "cesium": "^1.113.0",
-    "geopose-lib": "^0.0.1"
+    "geopose-lib": ">=0.0.2 <0.1.0"
   },
   "devDependencies": {
     "cesium": "^1.113.0",
-    "geopose-lib": "^0.0.1",
-    "typescript": "^5.9.3"
+    "geopose-lib": "file:../../../packages/geopose-lib",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.17"
   },
   "publishConfig": {
     "access": "public"

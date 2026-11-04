@@ -7,6 +7,16 @@ Interactive demo showcasing the GeoPose ↔ Cesium converter library, enabling i
 - **Node.js** 18+ (recommended: use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm))
 - **npm** (comes with Node.js)
 
+## Rotation convention and local packages
+
+Build the local core and adapter first using the
+[repository verification commands](../../docs/rotation-consistency.md#build-and-verify).
+This demo uses those local packages, so it exercises the corrected source.
+Use Node.js 22 or newer. GeoPose angles are intrinsic right-handed Z–Y–X;
+positive yaw rotates East toward North. Camera body axes are +X right,
++Y up and −Z forward; a model's visible forward axis is asset-specific.
+Native Cesium heading used for overview navigation remains compass heading.
+
 ## Installation
 
 ```bash
@@ -178,5 +188,5 @@ The quaternion represents orientation in the **local ENU (East-North-Up) tangent
 - Get a free token from [cesium.com/ion](https://cesium.com/ion/) for full features
 
 ### Build errors
-- Ensure Node.js 18+ is installed: `node --version`
+- Ensure Node.js 22+ is installed: `node --version`
 - Delete `node_modules` and `package-lock.json`, then run `npm install` again

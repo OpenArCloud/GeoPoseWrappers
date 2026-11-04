@@ -17,6 +17,17 @@ npm install cesium geopose-lib cesium-geopose
 import type { GeoPose, GeoPoseBYPR } from "cesium-geopose";
 ```
 
+## Camera and entity axes
+
+The 3D camera adapter maps camera body +X right, +Y up, −Z forward into
+local ENU. Identity looks down; YPR `(0, 0, 90)` looks North along the
+horizon. Cesium compass heading is not GeoPose yaw. The adapter uses world
+direction/up vectors, including when the camera reference transform changes.
+Entities retain their own body axes and model-specific geometry.
+
+Earlier adapter versions incorrectly passed native camera HPR through the
+GeoPose Euler formulas. See [migration and tests](../../../docs/rotation-consistency.md).
+
 ## Adapter usage
 
 ```ts

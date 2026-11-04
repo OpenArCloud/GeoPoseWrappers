@@ -9,6 +9,8 @@ Open Geospatial Consortium GeoPose Standards Working Group is responsible for th
 
 Read the [illustrated ENU, yaw–pitch–roll and quaternion guide](docs/enu-ypr-quaternion.md) for positive-yaw SVG illustrations, a step-by-step intrinsic rotation sequence, paired GeoPose JSON examples, conversion mathematics, and runnable npm examples.
 
+See the [rotation audit, migration notes and verification commands](docs/rotation-consistency.md) for wrapper and demo conventions.
+
 ## Repo layout
 
 - `packages/`
@@ -20,7 +22,7 @@ Read the [illustrated ENU, yaw–pitch–roll and quaternion guide](docs/enu-ypr
 - `sandbox/`
 -  - `cesium-demo`: Cesium-based visual verification demo.
 -  - `cesium-transforms-test`: Cesium-based visual verification demo.
--  - `ar-local-frame-demo`: (NOT WORKING) Cesium- and three.js based visualization of how transform library assists in realizing AR usecase
+-  - `ar-local-frame-demo`: Experimental Cesium/Three.js visualization of right-handed session transforms and AR asset placement
 - `devlog/`: Proposals, plans, and development logs.
 
 ## Status
