@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="610" viewBox="0 0 1000 610" role="img" aria-labelledby="title desc">
+<title id="title">Positive pitch about the rotated y axis</title>
+<desc id="desc">View from West toward East after positive 90-degree yaw. The rotated positive y axis points toward the viewer. North is left and Up is above. A positive 45-degree counterclockwise pitch turns the North-pointing x axis downward, and tilts z toward North. The y axis remains unchanged.</desc>
+<defs>
+<marker id="142c40" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#142c40"/>
+</marker>
+<marker id="b5c4ce" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#b5c4ce"/>
+</marker>
+<marker id="c73542" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#c73542"/>
+</marker>
+<marker id="1265c0" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#1265c0"/>
+</marker>
+<marker id="16845a" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#16845a"/>
+</marker>
+<marker id="7844b8" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+<path d="M0,0 L9,4.5 L0,9 Z" fill="#7844b8"/>
+</marker>
+</defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g font-family="DejaVu Sans, Arial, sans-serif" stroke-linecap="round" stroke-linejoin="round">
+<text x="36.00" y="46.00" font-size="29" fill="#142c40" font-weight="700" text-anchor="start">Why positive pitch tips +x downward here</text>
+<text x="36.00" y="78.00" font-size="17" fill="#506779" font-weight="400" text-anchor="start">After yaw +90°: look from West toward East, along the rotated y axis</text>
+<rect x="28" y="108" width="944" height="410" rx="18" fill="#f7fafc" stroke="#dce5eb"/>
+<line x1="240.000" y1="310.000" x2="830.000" y2="310.000" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<line x1="540.000" y1="465.000" x2="540.000" y2="165.000" stroke="#b5c4ce" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#b5c4ce)"/>
+<text x="220.00" y="296.00" font-size="18" fill="#506779" font-weight="600" text-anchor="start">North</text>
+<text x="800.00" y="296.00" font-size="18" fill="#506779" font-weight="600" text-anchor="start">South</text>
+<text x="553.00" y="165.00" font-size="18" fill="#506779" font-weight="600" text-anchor="start">Up</text>
+<line x1="540.000" y1="310.000" x2="335.000" y2="310.000" stroke="#c73542" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#c73542)"/>
+<text x="301.00" y="292.00" font-size="18" fill="#c73542" font-weight="600" text-anchor="start">x before</text>
+<line x1="540.000" y1="310.000" x2="540.000" y2="197.000" stroke="#16845a" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#16845a)"/>
+<text x="556.00" y="210.00" font-size="17" fill="#16845a" font-weight="600" text-anchor="start">z before</text>
+<line x1="540.000" y1="310.000" x2="395.043" y2="454.957" stroke="#c73542" stroke-width="4" marker-end="url(#c73542)"/>
+<text x="220.00" y="469.00" font-size="19" fill="#c73542" font-weight="700" text-anchor="start">x after +45°</text>
+<line x1="540.000" y1="310.000" x2="426.863" y2="196.863" stroke="#16845a" stroke-width="4" marker-end="url(#16845a)"/>
+<text x="298.00" y="190.00" font-size="19" fill="#16845a" font-weight="700" text-anchor="start">z after +45°</text>
+<path d="M 466,310 A 74,74 0 0 0 487.674,362.326" fill="none" stroke="#7844b8" stroke-width="3" marker-end="url(#7844b8)"/>
+<text x="420.00" y="381.00" font-size="18" fill="#7844b8" font-weight="700" text-anchor="start">+45°</text>
+<circle cx="540" cy="310" r="12" fill="white" stroke="#1265c0" stroke-width="2"/>
+<circle cx="540" cy="310" r="4" fill="#1265c0"/>
+<text x="567.00" y="352.00" font-size="17" fill="#1265c0" font-weight="600" text-anchor="start">⊙ y points West, toward you</text>
+<text x="52.00" y="493.00" font-size="17" fill="#142c40" font-weight="600" text-anchor="start">Positive remains counterclockwise when viewed from the positive rotation axis.</text>
+<text x="36.00" y="554.00" font-size="19" fill="#142c40" font-weight="600" text-anchor="start">The sign follows the axes, not the aviation phrase “nose up”.</text>
+<text x="36.00" y="584.00" font-size="16" fill="#506779" font-weight="400" text-anchor="start">Here object +x is forward and +z is up before pitch. Different body axes need an explicit mapping.</text>
+</g>
+</svg>

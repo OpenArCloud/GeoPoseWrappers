@@ -5,6 +5,10 @@ The goal of these projects is to make it easier for developers to input/output O
 
 Open Geospatial Consortium GeoPose Standards Working Group is responsible for the development and maintenance of GeoPose, a standard for geographically-anchored pose with 6 degrees of freedom referenced to one or more standardized Coordinate Reference Systems (CRSs). In June 2022, the OGC Technical Committee approved the [OGC GeoPose 1.0 Data Exchange Standard](https://docs.ogc.org/is/21-056r11/21-056r11.html) as an OGC Specification. 
 
+## Learn the rotation convention
+
+Read the [illustrated ENU, yaw–pitch–roll and quaternion guide](docs/enu-ypr-quaternion.md) for positive-yaw SVG illustrations, a step-by-step intrinsic rotation sequence, paired GeoPose JSON examples, conversion mathematics, and runnable npm examples.
+
 ## Repo layout
 
 - `packages/`
