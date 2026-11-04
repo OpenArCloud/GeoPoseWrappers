@@ -39,9 +39,9 @@ export interface GeoPoseBYPR {
     h: number; // Height in meters above WGS84 ellipsoid
   };
   angles: {
-    yaw: number; // Rotation around Z (up), degrees
-    pitch: number; // Rotation around Y (north), degrees
-    roll: number; // Rotation around X (east), degrees
+    yaw: number; // Right-handed yaw about +Z, degrees; East toward North
+    pitch: number; // Right-handed pitch about yaw-rotated +Y, degrees
+    roll: number; // Right-handed roll about yaw/pitch-rotated +X, degrees
   };
 }
 
@@ -161,36 +161,25 @@ export function deserializeGeoPoseArray(json: string): GeoPose[] {
  * @returns GeoPose with yaw/pitch/roll angles in degrees
  */
 export function quaternionToYPR(geoPose: GeoPose): GeoPoseBYPR {
-  const { x, y, z, w } = geoPose.quaternion;
-
-  // Roll (x-axis rotation)
-  const sinr_cosp = 2 * (w * x + y * z);
-  const cosr_cosp = 1 - 2 * (x * x + y * y);
-  const roll = Math.atan2(sinr_cosp, cosr_cosp);
-
-  // Pitch (y-axis rotation)
-  const sinp = 2 * (w * y - z * x);
-  let pitch: number;
-  if (Math.abs(sinp) >= 1) {
-    pitch = Math.sign(sinp) * (Math.PI / 2); // Clamp to ±90°
-  } else {
-    pitch = Math.asin(sinp);
-  }
-
-  // Yaw (z-axis rotation)
-  const siny_cosp = 2 * (w * z + x * y);
-  const cosy_cosp = 1 - 2 * (y * y + z * z);
-  const yaw = Math.atan2(siny_cosp, cosy_cosp);
-
-  // Convert radians to degrees
-  return {
-    position: { ...geoPose.position },
-    angles: {
-      yaw: (yaw * 180) / Math.PI,
-      pitch: (pitch * 180) / Math.PI,
-      roll: (roll * 180) / Math.PI,
-    },
-  };
+    const input = geoPose.quaternion;
+    const length = Math.hypot(input.x, input.y, input.z, input.w);
+    if (!Number.isFinite(length) || length === 0) {
+        throw new RangeError('Orientation must be a finite, nonzero quaternion');
+    }
+    const q = { x: input.x / length, y: input.y / length, z: input.z / length, w: input.w / length };
+    const sinp = Math.max(-1, Math.min(1, 2 * (q.w * q.y - q.z * q.x)));
+    // At gimbal lock choose roll = 0 and absorb the coupled rotation into yaw.
+    // 1e-12 is a tolerance on sin(pitch), not on the angle in degrees.
+    const locked = 1 - Math.abs(sinp) <= 1e-12;
+    const pitch = locked ? Math.sign(sinp) * Math.PI / 2 : Math.asin(sinp);
+    const roll = locked ? 0 : Math.atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x * q.x + q.y * q.y));
+    const rawYaw = locked ? 2 * Math.atan2(q.z, q.w)
+        : Math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z));
+    const yaw = Math.atan2(Math.sin(rawYaw), Math.cos(rawYaw));
+    return {
+        position: { ...geoPose.position },
+        angles: { yaw: yaw * 180 / Math.PI, pitch: pitch * 180 / Math.PI, roll: roll * 180 / Math.PI }
+    };
 }
 
 /**

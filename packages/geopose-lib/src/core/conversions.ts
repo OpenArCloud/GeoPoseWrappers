@@ -24,33 +24,24 @@ function radToDeg(rad: number): number {
  * Uses intrinsic Z-Y-X rotations (Yaw -> Pitch -> Roll).
  */
 export function quaternionToYPR(geoPose: GeoPose): GeoPoseBYPR {
-    const q = geoPose.quaternion;
-
-    // Roll (x-axis rotation)
-    const sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
-    const cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
-    const roll = Math.atan2(sinr_cosp, cosr_cosp);
-
-    // Pitch (y-axis rotation)
-    const sinp = 2 * (q.w * q.y - q.z * q.x);
-    let pitch: number;
-    if (Math.abs(sinp) >= 1)
-        pitch = Math.sign(sinp) * (Math.PI / 2); // use 90 degrees if out of range
-    else
-        pitch = Math.asin(sinp);
-
-    // Yaw (z-axis rotation)
-    const siny_cosp = 2 * (q.w * q.z + q.x * q.y);
-    const cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
-    const yaw = Math.atan2(siny_cosp, cosy_cosp);
-
+    const input = geoPose.quaternion;
+    const length = Math.hypot(input.x, input.y, input.z, input.w);
+    if (!Number.isFinite(length) || length === 0) {
+        throw new RangeError('Orientation must be a finite, nonzero quaternion');
+    }
+    const q = { x: input.x / length, y: input.y / length, z: input.z / length, w: input.w / length };
+    const sinp = Math.max(-1, Math.min(1, 2 * (q.w * q.y - q.z * q.x)));
+    // At gimbal lock choose roll = 0 and absorb the coupled rotation into yaw.
+    // 1e-12 is a tolerance on sin(pitch), not on the angle in degrees.
+    const locked = 1 - Math.abs(sinp) <= 1e-12;
+    const pitch = locked ? Math.sign(sinp) * Math.PI / 2 : Math.asin(sinp);
+    const roll = locked ? 0 : Math.atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x * q.x + q.y * q.y));
+    const rawYaw = locked ? 2 * Math.atan2(q.z, q.w)
+        : Math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z));
+    const yaw = Math.atan2(Math.sin(rawYaw), Math.cos(rawYaw));
     return {
         position: { ...geoPose.position },
-        angles: {
-            yaw: radToDeg(yaw),
-            pitch: radToDeg(pitch),
-            roll: radToDeg(roll)
-        }
+        angles: { yaw: yaw * 180 / Math.PI, pitch: pitch * 180 / Math.PI, roll: roll * 180 / Math.PI }
     };
 }
 
@@ -101,22 +92,7 @@ export function geoPoseToECEF(geoPose: GeoPose): { position: ECEF; orientation: 
     const y = (N + h) * cosLat * sinLon;
     const z = (N * (1 - WGS84.e2) + h) * sinLat;
 
-    // Orientation remains relative to the local frame concepts in GeoPose,
-    // but typically when moving to ECEF one might want world-aligned,
-    // however for this function signature we just pass it through or 
-    // leave it as the orientation of the object itself.
-    // The proposal says: "orientation expressed relative to ECEF axes"
-    // This implies we need to rotate the local tangent plane orientation 
-    // into the ECEF frame.
-    // However, for Phase 1, simply converting the position is critical.
-    // Handling the orientation rotation requires `localToFixedFrame` logic.
-    // For now returning the position is the main "geoPoseToECEF" logic for the point.
-    // To strictly follow "orientation relative to ECEF axes", we need to apply
-    // the local-to-ECEF rotation matrix to the object's quaternion.
-
-    // For this implementation, we will assume the input quaternion is "local" (ENU-based)
-    // and we want the output quaternion to be "global" (ECEF-based).
-
+    // q_ECEF_object = q_ECEF_ENU * q_ENU_object.
     const qLocal = geoPose.quaternion;
     const qEnuToEcef = getEnuToEcefRotation(lat, lon);
     const qGlobal = multiplyQuaternions(qEnuToEcef, qLocal);
@@ -253,7 +229,7 @@ function matrixToQuaternion(
 /**
  * Multiply two quaternions (a * b).
  */
-function multiplyQuaternions(a: Quaternion, b: Quaternion): Quaternion {
+export function multiplyQuaternions(a: Quaternion, b: Quaternion): Quaternion {
     return {
         x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
         y: a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,

@@ -37,11 +37,11 @@ export interface GeoPoseBYPR {
         h: number;
     };
     angles: {
-        /** Yaw in degrees. 0 = North, 90 = East. */
+        /** Yaw in degrees. 0 = East, +90 = North; counterclockwise viewed from +Up. */
         yaw: number;
-        /** Pitch in degrees. Positive = looking up. */
+        /** Pitch in degrees. Right-handed about the yaw-rotated +Y axis; +X tilts down. */
         pitch: number;
-        /** Roll in degrees. Positive = banking right. */
+        /** Roll in degrees. Right-handed about the yaw/pitch-rotated +X axis. */
         roll: number;
     };
 }

@@ -28,6 +28,10 @@
 package org.ogc.geopose.wrappers.arcore
 
 import kotlin.math.sqrt
+import org.json.JSONArray
+import org.json.JSONObject
+import org.json.JSONException
+
 
 /**
  * OGC GeoPose (Basic Quaternion) representation
@@ -196,9 +200,6 @@ fun GeoPose.toGeospatialPose(): GeospatialPose = GeoPoseConverter.fromGeoPose(th
 // JSON Serialization
 // ============================================================================
 
-import org.json.JSONArray
-import org.json.JSONObject
-import org.json.JSONException
 
 /**
  * Serialize GeoPose to OGC-compliant JSON string
@@ -333,9 +334,9 @@ data class GeoPoseYPR(
     val angles: Angles
 ) {
     data class Angles(
-        val yaw: Double,   // Rotation around Z (up), degrees
-        val pitch: Double, // Rotation around Y (north), degrees
-        val roll: Double   // Rotation around X (east), degrees
+        val yaw: Double,   // Right-handed yaw about +Z, degrees; East toward North
+        val pitch: Double, // Right-handed pitch about yaw-rotated +Y, degrees
+        val roll: Double   // Right-handed roll about yaw/pitch-rotated +X, degrees
     )
 
     /**
@@ -391,25 +392,17 @@ data class GeoPoseYPR(
          * Create YPR representation from Quaternion representation
          */
         fun fromQuaternion(geoPose: GeoPose): GeoPoseYPR {
-            val q = geoPose.quaternion
-
-            // Roll (x-axis rotation)
-            val sinrCosp = 2.0 * (q.w * q.x + q.y * q.z)
-            val cosrCosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y)
-            val roll = kotlin.math.atan2(sinrCosp, cosrCosp)
-
-            // Pitch (y-axis rotation)
-            val sinp = 2.0 * (q.w * q.y - q.z * q.x)
-            val pitch = if (kotlin.math.abs(sinp) >= 1) {
-                kotlin.math.copySign(Math.PI / 2, sinp) // Clamp to ±90°
-            } else {
-                kotlin.math.asin(sinp)
-            }
-
-            // Yaw (z-axis rotation)
-            val sinyCosp = 2.0 * (q.w * q.z + q.x * q.y)
-            val cosyCosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
-            val yaw = kotlin.math.atan2(sinyCosp, cosyCosp)
+            val input = geoPose.quaternion
+            val length = sqrt(input.x*input.x + input.y*input.y + input.z*input.z + input.w*input.w)
+            require(length.isFinite() && length > 0) { "Orientation must be finite and nonzero" }
+            val q = input.normalized()
+            val sinp = (2.0 * (q.w*q.y - q.z*q.x)).coerceIn(-1.0, 1.0)
+            val locked = 1.0 - kotlin.math.abs(sinp) <= 1e-12
+            val pitch = if (locked) Math.copySign(Math.PI / 2, sinp) else kotlin.math.asin(sinp)
+            val roll = if (locked) 0.0 else kotlin.math.atan2(2*(q.w*q.x + q.y*q.z), 1-2*(q.x*q.x + q.y*q.y))
+            val rawYaw = if (locked) 2*kotlin.math.atan2(q.z, q.w)
+                else kotlin.math.atan2(2*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y + q.z*q.z))
+            val yaw = kotlin.math.atan2(kotlin.math.sin(rawYaw), kotlin.math.cos(rawYaw))
 
             // Convert radians to degrees
             val angles = Angles(

@@ -437,7 +437,7 @@
       baseLayerPicker: true,
       geocoder: false,
       homeButton: true,
-      sceneModePicker: true,
+      sceneModePicker: false,
       navigationHelpButton: false,
       fullscreenButton: false,
       infoBox: false,
@@ -467,6 +467,7 @@
 
   <div class="controls-panel">
     <h1>Transforms Test Runner</h1>
+    <p>Right-handed ENU: yaw +90° rotates body +X from East toward North. Model geometry may use a different visible forward axis.</p>
     <p class="subtitle">Visual Verification for geopose-lib</p>
 
     <div class="test-controls">

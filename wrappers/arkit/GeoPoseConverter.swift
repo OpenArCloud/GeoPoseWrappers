@@ -107,6 +107,16 @@ public struct GeoAnchorData: Equatable {
     public let altitudeSource: AltitudeSource
     public let transform: simd_float4x4
 
+    public static func == (lhs: GeoAnchorData, rhs: GeoAnchorData) -> Bool {
+        lhs.coordinate.latitude == rhs.coordinate.latitude &&
+        lhs.coordinate.longitude == rhs.coordinate.longitude &&
+        lhs.altitude == rhs.altitude && lhs.altitudeSource == rhs.altitudeSource &&
+        lhs.transform.columns.0 == rhs.transform.columns.0 &&
+        lhs.transform.columns.1 == rhs.transform.columns.1 &&
+        lhs.transform.columns.2 == rhs.transform.columns.2 &&
+        lhs.transform.columns.3 == rhs.transform.columns.3
+    }
+
     public enum AltitudeSource: Int {
         case unknown = 0
         case coarse = 1
@@ -154,7 +164,9 @@ public enum GeoPoseConverter {
 
     /// Converts ARGeoAnchor data to OGC GeoPose (Basic Quaternion)
     ///
-    /// - Parameter geoAnchorData: The ARGeoAnchor data with EUS-like orientation
+    /// Precondition: the transform rotation is expressed in a true East-Up-South frame.
+    /// For an arbitrary AR session, first apply its georeferencing rotation.
+    /// - Parameter geoAnchorData: The ARGeoAnchor data with EUS orientation
     /// - Returns: GeoPose with ENU orientation
     public static func toGeoPose(from geoAnchorData: GeoAnchorData) -> GeoPose {
         // Extract position (direct mapping, both use WGS84)
@@ -165,7 +177,9 @@ public enum GeoPoseConverter {
         )
 
         // Extract quaternion from transform matrix
-        let eusQuat = simd_quatd(simd_quatf(geoAnchorData.transform))
+        let rotation = simd_quatf(geoAnchorData.transform)
+        let eusQuat = simd_quatd(ix: Double(rotation.imag.x), iy: Double(rotation.imag.y),
+                                 iz: Double(rotation.imag.z), r: Double(rotation.real))
 
         // Transform from EUS to ENU frame
         let enuQuat = simd_mul(qEusToEnu, eusQuat)
@@ -194,7 +208,9 @@ public enum GeoPoseConverter {
 
         // Build transform matrix from quaternion
         // The rotation part comes from the quaternion
-        let rotationMatrix = simd_float3x3(simd_quatf(normalizedQuat))
+        let floatQuat = simd_quatf(ix: Float(normalizedQuat.imag.x), iy: Float(normalizedQuat.imag.y),
+                                   iz: Float(normalizedQuat.imag.z), r: Float(normalizedQuat.real))
+        let rotationMatrix = simd_float3x3(floatQuat)
 
         // Create full 4x4 transform (rotation only, no translation in local space)
         var transform = simd_float4x4(1.0) // Identity
@@ -229,7 +245,7 @@ extension GeoPose {
 
 // MARK: - ARKit Integration (when ARKit is available)
 
-#if canImport(ARKit)
+#if canImport(ARKit) && os(iOS) && !targetEnvironment(macCatalyst)
 import ARKit
 
 @available(iOS 14.0, *)
@@ -238,11 +254,12 @@ extension GeoPoseConverter {
     /// Converts an ARGeoAnchor to OGC GeoPose (Basic Quaternion)
     ///
     /// - Parameter geoAnchor: ARKit's ARGeoAnchor
-    /// - Returns: GeoPose with ENU orientation
-    public static func toGeoPose(from geoAnchor: ARGeoAnchor) -> GeoPose {
+    /// - Returns: GeoPose with ENU orientation, or nil while altitude is unavailable.
+    public static func toGeoPose(from geoAnchor: ARGeoAnchor) -> GeoPose? {
+        guard let altitude = geoAnchor.altitude else { return nil }
         let data = GeoAnchorData(
             coordinate: geoAnchor.coordinate,
-            altitude: geoAnchor.altitude,
+            altitude: altitude,
             altitudeSource: GeoAnchorData.AltitudeSource(rawValue: geoAnchor.altitudeSource.rawValue) ?? .unknown,
             transform: geoAnchor.transform
         )
@@ -268,8 +285,8 @@ extension GeoPoseConverter {
 
 @available(iOS 14.0, *)
 extension ARGeoAnchor {
-    /// Convert to GeoPose
-    public func toGeoPose() -> GeoPose {
+    /// Convert to GeoPose, or nil while the anchor has no altitude.
+    public func toGeoPose() -> GeoPose? {
         GeoPoseConverter.toGeoPose(from: self)
     }
 }
@@ -366,8 +383,8 @@ public struct GeoPoseYPR: Codable, Equatable {
 
     public struct Angles: Codable, Equatable {
         public let yaw: Double    // Rotation around Z (up), degrees, positive = CCW from East
-        public let pitch: Double  // Rotation around Y (north), degrees, positive = nose up
-        public let roll: Double   // Rotation around X (east), degrees, positive = right wing down
+        public let pitch: Double  // Right-handed around yaw-rotated +Y; +X tilts down
+        public let roll: Double   // Right-handed around yaw/pitch-rotated +X
 
         public init(yaw: Double, pitch: Double, roll: Double) {
             self.yaw = yaw
@@ -405,26 +422,17 @@ public struct GeoPoseYPR: Codable, Equatable {
 
     /// Create YPR representation from Quaternion representation
     public static func fromQuaternion(_ geoPose: GeoPose) -> GeoPoseYPR {
-        let q = geoPose.quaternion
-
-        // Roll (x-axis rotation)
-        let sinr_cosp = 2.0 * (q.w * q.x + q.y * q.z)
-        let cosr_cosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y)
-        let roll = atan2(sinr_cosp, cosr_cosp)
-
-        // Pitch (y-axis rotation)
-        let sinp = 2.0 * (q.w * q.y - q.z * q.x)
-        let pitch: Double
-        if abs(sinp) >= 1 {
-            pitch = copysign(.pi / 2, sinp) // Clamp to ±90°
-        } else {
-            pitch = asin(sinp)
-        }
-
-        // Yaw (z-axis rotation)
-        let siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
-        let cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
-        let yaw = atan2(siny_cosp, cosy_cosp)
+        let input = geoPose.quaternion
+        let length = sqrt(input.x*input.x + input.y*input.y + input.z*input.z + input.w*input.w)
+        precondition(length.isFinite && length > 0, "Orientation must be finite and nonzero")
+        let q = input.normalized
+        let sinp = max(-1.0, min(1.0, 2.0 * (q.w*q.y - q.z*q.x)))
+        // At gimbal lock choose roll = 0 and absorb the coupled rotation into yaw.
+        let locked = 1.0 - abs(sinp) <= 1e-12
+        let pitch = locked ? copysign(.pi / 2, sinp) : asin(sinp)
+        let roll = locked ? 0 : atan2(2*(q.w*q.x + q.y*q.z), 1-2*(q.x*q.x + q.y*q.y))
+        let rawYaw = locked ? 2*atan2(q.z, q.w) : atan2(2*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y + q.z*q.z))
+        let yaw = atan2(sin(rawYaw), cos(rawYaw))
 
         // Convert radians to degrees
         let angles = Angles(

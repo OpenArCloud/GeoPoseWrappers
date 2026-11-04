@@ -1,0 +1,38 @@
+name: Rotation consistency
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci && npm test && npm run build
+        working-directory: packages/geopose-lib
+      - run: npm ci && npm test && npm run build
+        working-directory: integrations/cesium/cesium-geopose
+      - run: npm ci && npm test && npm run build
+        working-directory: sandbox/ar-local-frame-demo
+      - run: npm ci && npm run build
+        working-directory: sandbox/cesium-demo
+      - run: npm ci && npm run build
+        working-directory: sandbox/cesium-transforms-test
+  kotlin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 wrappers/arcore/test/run.py
+  swift:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          swiftc wrappers/arkit/GeoPoseConverter.swift wrappers/arkit/test/RotationTest.swift -o "$RUNNER_TEMP/geopose-swift-test"
+          "$RUNNER_TEMP/geopose-swift-test" docs/examples/enu-rotation-poses.json
+          xcrun --sdk iphoneos swiftc -typecheck -target arm64-apple-ios14.0 -sdk "$(xcrun --sdk iphoneos --show-sdk-path)" wrappers/arkit/GeoPoseConverter.swift

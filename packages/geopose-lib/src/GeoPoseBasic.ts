@@ -30,7 +30,8 @@ import {
 } from './core/projected.js';
 
 /**
- * Relative pose expressed as ENU translation and quaternion rotation.
+ * Relative pose: ENU translation at the base position, body-relative rotation.
+ * Applying rotation postmultiplies the base orientation; identity preserves it.
  */
 export type RelativePose = { translation: ENU; rotation: Quaternion };
 
@@ -315,7 +316,7 @@ export class GeoPoseBasic {
     }
 
     /**
-     * Yaw in degrees (0 = North, 90 = East).
+     * Yaw in degrees (0 = East, +90 = North; counterclockwise viewed from +Up).
      */
     get yaw(): number {
         return this.toGeoPoseYPR().angles.yaw;
@@ -338,7 +339,7 @@ export class GeoPoseBasic {
     }
 
     /**
-     * Pitch in degrees (positive = looking up).
+     * Pitch in degrees (right-handed about the yaw-rotated +Y axis; +X tilts down).
      */
     get pitch(): number {
         return this.toGeoPoseYPR().angles.pitch;
@@ -350,7 +351,7 @@ export class GeoPoseBasic {
     }
 
     /**
-     * Roll in degrees (positive = banking right).
+     * Roll in degrees (right-handed about the yaw/pitch-rotated +X axis).
      */
     get roll(): number {
         return this.toGeoPoseYPR().angles.roll;
@@ -362,7 +363,7 @@ export class GeoPoseBasic {
     }
 
     /**
-     * Heading in degrees (alias for yaw).
+     * Legacy alias for mathematical ENU yaw, NOT compass heading. Prefer yaw.
      */
     get heading(): number {
         return this.yaw;
@@ -373,7 +374,7 @@ export class GeoPoseBasic {
     }
 
     /**
-     * Heading in degrees (alias for heading).
+     * Legacy ENU yaw alias; not clockwise-from-North compass heading.
      */
     get headingDegrees(): number {
         return this.heading;
@@ -694,28 +695,31 @@ export class GeoPoseBasic {
     }
 
     /**
-     * Rotate around the local up axis by degrees (yaw delta).
+     * Rotate around the fixed local ENU +Up axis, right-handed, by degrees.
      */
     rotateAroundUpAxis(degrees: number): this {
-        return this.rotateByYPRDelta({ yaw: degrees, pitch: 0, roll: 0 });
+        const half = degrees * Math.PI / 360;
+        return this.rotateByQuaternion({ x: 0, y: 0, z: Math.sin(half), w: Math.cos(half) });
     }
 
     /**
-     * Rotate around the local north axis by degrees (pitch delta).
+     * Rotate around the fixed local ENU +North axis, right-handed, by degrees.
      */
     rotateAroundNorthAxis(degrees: number): this {
-        return this.rotateByYPRDelta({ yaw: 0, pitch: degrees, roll: 0 });
+        const half = degrees * Math.PI / 360;
+        return this.rotateByQuaternion({ x: 0, y: Math.sin(half), z: 0, w: Math.cos(half) });
     }
 
     /**
-     * Rotate around the local east axis by degrees (roll delta).
+     * Rotate around the fixed local ENU +East axis, right-handed, by degrees.
      */
     rotateAroundEastAxis(degrees: number): this {
-        return this.rotateByYPRDelta({ yaw: 0, pitch: 0, roll: degrees });
+        const half = degrees * Math.PI / 360;
+        return this.rotateByQuaternion({ x: Math.sin(half), y: 0, z: 0, w: Math.cos(half) });
     }
 
     /**
-     * Apply a quaternion rotation to the current orientation.
+     * Premultiply a rotation expressed in fixed local ENU axes: q_new = rotation * q.
      */
     rotateByQuaternion(rotation: Quaternion): this {
         const rotated = multiplyQuaternions(rotation, this._quaternion);
@@ -741,21 +745,7 @@ export class GeoPoseBasic {
         return this;
     }
 
-    // ---------------------------------------------------------------------
-    // Internal helpers
-    // ---------------------------------------------------------------------
 
-    /**
-     * Internal helper for applying a YPR delta in degrees.
-     */
-    private rotateByYPRDelta(delta: { yaw: number; pitch: number; roll: number }): this {
-        const ypr = quaternionToYPR(this.toGeoPose());
-        return this.setYPROrientation(
-            ypr.angles.yaw + delta.yaw,
-            ypr.angles.pitch + delta.pitch,
-            ypr.angles.roll + delta.roll
-        );
-    }
 }
 
 /**
